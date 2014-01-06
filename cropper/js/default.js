@@ -18,14 +18,15 @@
     this.background = new Image();
     this.background.src = this.imageSrc;
     this.background.onload = function () {
-        that._stageMaker();
+        that._initStage();
     }
 
 } 
 
+
 CropJS.prototype = {
 
-    _stageMaker: function() {
+    _initStage: function() {
 
         if (!this.width) this.width = this.background.width;
         if (!this.height) this.height = this.background.height;
@@ -58,7 +59,6 @@ CropJS.prototype = {
         this._stage.add(this._staticLayer);
 
         this._dynamicLayer = new Kinetic.Layer();
-        if (this.cropEdges) this._setupSelectionRectangle();
 
         this._fullMask = new Kinetic.Rect({
             x: 0,
@@ -70,11 +70,14 @@ CropJS.prototype = {
         });
         this._dynamicLayer.add(this._fullMask);
         this._stage.add(this._dynamicLayer);
-
-
+        if (this.cropEdges) {
+            this._setupSelectionRectangle();
+            this._addSelectionRectangle();
+        }
+        
     },
 
-    _setupSelectionRectangle: function() {
+    _initSelectionRectangle: function() {
 
         if (!this.cropEdges) return;
 
@@ -86,11 +89,14 @@ CropJS.prototype = {
             y: this.cropEdges.topY,
             width: this.cropEdges.rightX - this.cropEdges.leftX,
             height: this.cropEdges.bottomY - this.cropEdges.topY,
-            fillEnabled: false,
-            stroke: this.selectionRectangleColor,
-            strokeWidth: 3,
-            opacity: 0.6,
         });
+        this._selectionRectangle
+            .on('mouseover', function () {
+                document.body.style.cursor = 'move';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
         
         // Toggles
         if (!this.toggleSize) this.toggleSize = 8;
@@ -101,13 +107,27 @@ CropJS.prototype = {
             height: this.toggleSize,
             fill: this.selectionRectangleColor,
         });
+        this._toggleTopLeft
+            .on('mouseover', function () {
+                document.body.style.cursor = 'nw-resize';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
         this._toggleTopRight = new Kinetic.Rect({
             x: this.cropEdges.rightX - this.toggleSize / 2,
             y: this.cropEdges.topY - this.toggleSize / 2,
             width: this.toggleSize,
             height: this.toggleSize,
-            fill: 'yellow',
+            fill: this.selectionRectangleColor,
         });
+        this._toggleTopRight
+            .on('mouseover', function () {
+                document.body.style.cursor = 'ne-resize';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
         this._toggleBottomLeft = new Kinetic.Rect({
             x: this.cropEdges.leftX - this.toggleSize / 2,
             y: this.cropEdges.bottomY - this.toggleSize / 2,
@@ -115,6 +135,13 @@ CropJS.prototype = {
             height: this.toggleSize,
             fill: this.selectionRectangleColor,
         });
+        this._toggleBottomLeft
+            .on('mouseover', function () {
+                document.body.style.cursor = 'sw-resize';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
         this._toggleBottomRight = new Kinetic.Rect({
             x: this.cropEdges.rightX - this.toggleSize / 2,
             y: this.cropEdges.bottomY - this.toggleSize / 2,
@@ -122,6 +149,13 @@ CropJS.prototype = {
             height: this.toggleSize,
             fill: this.selectionRectangleColor,
         });
+        this._toggleBottomRight
+            .on('mouseover', function () {
+                document.body.style.cursor = 'se-resize';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
         
         // Masks
         this._maskLeft = new Kinetic.Rect({
@@ -132,6 +166,13 @@ CropJS.prototype = {
             fill: 'black',
             opacity: 0.4,
         });
+        this._maskLeft
+            .on('mouseover', function () {
+                document.body.style.cursor = 'crosshair';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
         this._maskRight = new Kinetic.Rect({
             x: this.cropEdges.rightX,
             y: 0,
@@ -140,6 +181,13 @@ CropJS.prototype = {
             fill: 'black',
             opacity: 0.4,
         });
+        this._maskRight
+            .on('mouseover', function () {
+                document.body.style.cursor = 'crosshair';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
         this._maskTop = new Kinetic.Rect({
             x: this.cropEdges.leftX,
             y: 0,
@@ -148,6 +196,13 @@ CropJS.prototype = {
             fill: 'black',
             opacity: 0.4,
         });
+        this._maskTop
+            .on('mouseover', function () {
+                document.body.style.cursor = 'crosshair';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
         this._maskBottom = new Kinetic.Rect({
             x: this.cropEdges.leftX,
             y: this.cropEdges.bottomY,
@@ -156,22 +211,34 @@ CropJS.prototype = {
             fill: 'black',
             opacity: 0.4,
         });
+        this._maskBottom
+            .on('mouseover', function () {
+                document.body.style.cursor = 'crosshair';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
+
+    },
+
+    _addSelectionRectangle: function() {
         
         // Add to stage
+        this._dynamicLayer.add(this._maskLeft);
+        this._dynamicLayer.add(this._maskRight);
+        this._dynamicLayer.add(this._maskTop);
+        this._dynamicLayer.add(this._maskBottom);
         this._dynamicLayer.add(this._selectionRectangle);
         this._dynamicLayer.add(this._toggleTopLeft);
         this._dynamicLayer.add(this._toggleTopRight);
         this._dynamicLayer.add(this._toggleBottomLeft);
         this._dynamicLayer.add(this._toggleBottomRight); 
-        this._dynamicLayer.add(this._maskLeft);
-        this._dynamicLayer.add(this._maskRight); 
-        this._dynamicLayer.add(this._maskTop);
-        this._dynamicLayer.add(this._maskBottom);
+
         this._dynamicLayer.draw();
 
     },
 
-    resetSelectionRectangle: function() {
+    _removeSelectionRectangle: function() {
 
         this._selectionRectangle.remove();
         this._toggleTopLeft.remove();
