@@ -12,7 +12,7 @@
         console.log("required attribute imageContainerID not defined");
         return;
     }
-    if (!this.selectionRectangleColor) this.selectionRectangleColor = 'black';
+    if (!this.selectionRectangleColor) this.selectionRectangleColor = 'white';
 
     // Setup canvas with KinecticJS
     this.background = new Image();
@@ -111,19 +111,19 @@ CropJS.prototype = {
                 document.body.style.cursor = 'default';
             });
         
-        // Toggles
-        if (!this.toggleSize) this.toggleSize = 10;
+        // Crop Handles
+        if (!this.handleSize) this.handleSize = 10;
         console.log(this);
 
-        this._toggles = {
+        this._handles = {
 
-            size: this.toggleSize,
+            size: this.handleSize,
 
             topLeft: new Kinetic.Rect({
-                x: this.cropEdges.leftX - this.toggleSize / 2,
-                y: this.cropEdges.topY - this.toggleSize / 2,
-                width: this.toggleSize,
-                height: this.toggleSize,
+                x: this.cropEdges.leftX - this.handleSize / 2,
+                y: this.cropEdges.topY - this.handleSize / 2,
+                width: this.handleSize,
+                height: this.handleSize,
                 fill: this.selectionRectangleColor,
                 mouse: false,
             })
@@ -153,10 +153,10 @@ CropJS.prototype = {
                 }),
 
             topRight: new Kinetic.Rect({
-                x: this.cropEdges.rightX - this.toggleSize / 2,
-                y: this.cropEdges.topY - this.toggleSize / 2,
-                width: this.toggleSize,
-                height: this.toggleSize,
+                x: this.cropEdges.rightX - this.handleSize / 2,
+                y: this.cropEdges.topY - this.handleSize / 2,
+                width: this.handleSize,
+                height: this.handleSize,
                 fill: this.selectionRectangleColor,
                 mouse: false,
             })
@@ -186,10 +186,10 @@ CropJS.prototype = {
                 }),
 
             bottomLeft: new Kinetic.Rect({
-                x: this.cropEdges.leftX - this.toggleSize / 2,
-                y: this.cropEdges.bottomY - this.toggleSize / 2,
-                width: this.toggleSize,
-                height: this.toggleSize,
+                x: this.cropEdges.leftX - this.handleSize / 2,
+                y: this.cropEdges.bottomY - this.handleSize / 2,
+                width: this.handleSize,
+                height: this.handleSize,
                 fill: this.selectionRectangleColor,
                 mouse: false,
             })
@@ -219,10 +219,10 @@ CropJS.prototype = {
                 }),
 
             bottomRight: new Kinetic.Rect({
-                x: this.cropEdges.rightX - this.toggleSize / 2,
-                y: this.cropEdges.bottomY - this.toggleSize / 2,
-                width: this.toggleSize,
-                height: this.toggleSize,
+                x: this.cropEdges.rightX - this.handleSize / 2,
+                y: this.cropEdges.bottomY - this.handleSize / 2,
+                width: this.handleSize,
+                height: this.handleSize,
                 fill: this.selectionRectangleColor,
                 mouse: false,
             })
@@ -340,10 +340,10 @@ CropJS.prototype = {
 
         this._masks.add()
         this._dynamicLayer.add(this._selectionRectangle);
-        this._toggles.add();
+        this._handles.add();
         this._dynamicLayer.draw();
 
-        this._stage.on('mousemove', function () {
+        this._stage.on('mousemove touchmove', function () {
 
             // Handle when selection is inverted
             if (that.cropEdges.leftX > that.cropEdges.rightX) {
@@ -351,27 +351,40 @@ CropJS.prototype = {
                 var temp = that.cropEdges.leftX;
                 that.cropEdges.leftX = that.cropEdges.rightX;
                 that.cropEdges.rightX = temp;
-                // Swap toggles
-                temp = that._toggles.topLeft.attrs.mouse;
-                that._toggles.topLeft.attrs.mouse = that._toggles.topRight.attrs.mouse;
-                that._toggles.topRight.attrs.mouse = temp;
-                temp = that._toggles.bottomLeft.attrs.mouse;
-                that._toggles.bottomLeft.attrs.mouse = that._toggles.bottomRight.attrs.mouse;
-                that._toggles.bottomRight.attrs.mouse = temp;
+                // Swap handles
+                temp = that._handles.topLeft.attrs.mouse;
+                that._handles.topLeft.attrs.mouse = that._handles.topRight.attrs.mouse;
+                that._handles.topRight.attrs.mouse = temp;
+                temp = that._handles.bottomLeft.attrs.mouse;
+                that._handles.bottomLeft.attrs.mouse = that._handles.bottomRight.attrs.mouse;
+                that._handles.bottomRight.attrs.mouse = temp;
             }
             if (that.cropEdges.topY > that.cropEdges.bottomY) {
                 // Swap edges
                 var temp = that.cropEdges.topY;
                 that.cropEdges.topY = that.cropEdges.bottomY;
                 that.cropEdges.bottomY = temp;
-                // Swap toggles
-                temp = that._toggles.topLeft.attrs.mouse;
-                that._toggles.topLeft.attrs.mouse = that._toggles.bottomLeft.attrs.mouse;
-                that._toggles.bottomLeft.attrs.mouse = temp;
-                temp = that._toggles.topRight.attrs.mouse;
-                that._toggles.topRight.attrs.mouse = that._toggles.bottomRight.attrs.mouse;
-                that._toggles.bottomRight.attrs.mouse = temp;
+                // Swap handles
+                temp = that._handles.topLeft.attrs.mouse;
+                that._handles.topLeft.attrs.mouse = that._handles.bottomLeft.attrs.mouse;
+                that._handles.bottomLeft.attrs.mouse = temp;
+                temp = that._handles.topRight.attrs.mouse;
+                that._handles.topRight.attrs.mouse = that._handles.bottomRight.attrs.mouse;
+                that._handles.bottomRight.attrs.mouse = temp;
             }
+
+            // Implement handles
+            if (that._handles.topLeft.attrs.mouse) that._handles.topLeft.fire('mousemove');
+            if (that._handles.topRight.attrs.mouse) that._handles.topRight.fire('mousemove');
+            if (that._handles.bottomLeft.attrs.mouse) that._handles.bottomLeft.fire('mousemove');
+            if (that._handles.bottomRight.attrs.mouse) that._handles.bottomRight.fire('mousemove');
+
+            // Implement selected region
+
+            // Implement unselected region
+
+            that._updateSelectionRectangle();
+
         });
 
     },
@@ -387,10 +400,10 @@ CropJS.prototype = {
     _removeSelectionRectangle: function() {
 
         this._selectionRectangle.remove();
-        this._toggleTopLeft.remove();
-        this._toggleTopRight.remove();
-        this._toggleBottomLeft.remove();
-        this._toggleBottomRight.remove();
+        this._handleTopLeft.remove();
+        this._handleTopRight.remove();
+        this._handleBottomLeft.remove();
+        this._handleBottomRight.remove();
         this._maskLeft.remove();
         this._maskRight.remove();
         this._maskTop.remove();
@@ -403,7 +416,7 @@ CropJS.prototype = {
 
         // Convenience variables
         var rect = this._selectionRectangle,
-            toggles = this._toggles,
+            handles = this._handles,
             masks = this._masks,
             edges = this.cropEdges;
 
@@ -413,15 +426,15 @@ CropJS.prototype = {
         rect.setWidth(edges.rightX - edges.leftX);
         rect.setHeight(edges.bottomY - edges.topY);
 
-        // Update Toggles
-        toggles.topLeft.setX(edges.leftX - this.toggleSize / 2);
-        toggles.topLeft.setY(edges.topY - this.toggleSize / 2);
-        toggles.topRight.setX(edges.rightX - this.toggleSize / 2);
-        toggles.topRight.setY(edges.topY - this.toggleSize / 2);
-        toggles.bottomLeft.setX(edges.leftX - this.toggleSize / 2);
-        toggles.bottomLeft.setY(edges.bottomY - this.toggleSize / 2);
-        toggles.bottomRight.setX(edges.rightX - this.toggleSize / 2);
-        toggles.bottomRight.setY(edges.bottomY - this.toggleSize / 2);
+        // Update handles
+        handles.topLeft.setX(edges.leftX - this.handleSize / 2);
+        handles.topLeft.setY(edges.topY - this.handleSize / 2);
+        handles.topRight.setX(edges.rightX - this.handleSize / 2);
+        handles.topRight.setY(edges.topY - this.handleSize / 2);
+        handles.bottomLeft.setX(edges.leftX - this.handleSize / 2);
+        handles.bottomLeft.setY(edges.bottomY - this.handleSize / 2);
+        handles.bottomRight.setX(edges.rightX - this.handleSize / 2);
+        handles.bottomRight.setY(edges.bottomY - this.handleSize / 2);
 
         // Update Masks
         masks.top.setX(edges.leftX);
@@ -430,10 +443,10 @@ CropJS.prototype = {
         masks.bottom.setX(edges.leftX);
         masks.bottom.setY(edges.bottomY);
         masks.bottom.setWidth(edges.rightX - edges.leftX);
-        masks.bottom.setHeight(this._stage.height - edges.bottomY);
+        masks.bottom.setHeight(this._stage.attrs.height - edges.bottomY);
         masks.left.setWidth(edges.leftX);
         masks.right.setX(edges.rightX);
-        masks.right.setWidth(this._stage.width - edges.rightX);
+        masks.right.setWidth(this._stage.attrs.width - edges.rightX);
 
         // draw Layer
         this._dynamicLayer.draw();
