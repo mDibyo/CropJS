@@ -97,6 +97,7 @@ CropJS.prototype = {
         var that = this;
 
         // Selection Rectangle
+
         this._selectionRectangle = new Kinetic.Rect({
             x: this.cropEdges.leftX,
             y: this.cropEdges.topY,
@@ -109,7 +110,9 @@ CropJS.prototype = {
             })
             .on('mouseout', function () {
                 document.body.style.cursor = 'default';
-            });
+            })
+            
+        ;
         
         // Crop Handles
         if (!this.handleSize) this.handleSize = 10;
@@ -118,6 +121,8 @@ CropJS.prototype = {
         this._handles = {
 
             size: this.handleSize,
+
+            active: undefined,
 
             topLeft: new Kinetic.Rect({
                 x: this.cropEdges.leftX - this.handleSize / 2,
@@ -135,20 +140,26 @@ CropJS.prototype = {
                 })
                 .on('mousedown touchstart', function () {
                     if (that._mouse) return;
+                    if (that._handles.active != undefined &&
+                        that._handles.active != 'topLeft') {
+                        return;
+                    }
+                    that._handles.active = 'topLeft';
                     that._mouse = true;
-                    this.attrs.mouse = true;
                     console.log("topLeft mousedown");
                 })
                 .on('mousemove touchmove', function () {
                     if (!that._mouse) return;
+                    if (that._handles.active != 'topLeft') return;
                     that.cropEdges.leftX = that._stage.getPointerPosition().x;
                     that.cropEdges.topY = that._stage.getPointerPosition().y;
                     console.log("topLeft mousemove");
+                    console.log(that._handles.active);
                 })
                 .on('mouseup touchend', function () {
                     if (!that._mouse) return;
                     that._mouse = false;
-                    this.attrs.mouse = false;
+                    that._handles.active = undefined;
                     console.log("topLeft mouseup");
                 }),
 
@@ -168,20 +179,26 @@ CropJS.prototype = {
                 })
                 .on('mousedown touchstart', function () {
                     if (that._mouse) return;
+                    if (that._handles.active != undefined &&
+                        that._handles.active != 'topRight') {
+                        return;
+                    }
+                    that._handles.active = 'topRight';
                     that._mouse = true;
-                    this.attrs.mouse = true;
                     console.log("topRight mousedown");
                 })
                 .on('mousemove touchmove', function () {
                     if (!that._mouse) return;
+                    if (that._handles.active != 'topRight') return;
                     that.cropEdges.rightX = that._stage.getPointerPosition().x;
                     that.cropEdges.topY = that._stage.getPointerPosition().y;
                     console.log("topRight mousemove");
+                    console.log(that._handles.active);
                 })
                 .on('mouseup touchend', function () {
                     if (!that._mouse) return;
                     that._mouse = false;
-                    this.attrs.mouse = false;
+                    that._handles.active = undefined;
                     console.log("topRight mouseup");
                 }),
 
@@ -201,20 +218,26 @@ CropJS.prototype = {
                 })
                 .on('mousedown touchstart', function () {
                     if (that._mouse) return;
+                    if (that._handles.active != undefined &&
+                        that._handles.active != 'bottomLeft') {
+                        return;
+                    }
+                    that._handles.active = 'bottomLeft';
                     that._mouse = true;
-                    this.attrs.mouse = true;
                     console.log("bottomLeft mousedown");
                 })
                 .on('mousemove touchmove', function () {
                     if (!that._mouse) return;
+                    if (that._handles.active != 'bottomLeft') return;
                     that.cropEdges.leftX = that._stage.getPointerPosition().x;
                     that.cropEdges.bottomY = that._stage.getPointerPosition().y;
                     console.log("bottomLeft mousemove");
+                    console.log(that._handles.active);
                 })
                 .on('mouseup touchend', function () {
                     if (!that._mouse) return;
                     that._mouse = false;
-                    this.attrs.mouse = false;
+                    that._handles.active = undefined;
                     console.log('bottomLeft mouseup');
                 }),
 
@@ -234,28 +257,56 @@ CropJS.prototype = {
                 })
                 .on('mousedown touchstart', function () {
                     if (that._mouse) return;
+                    if (that._handles.active != undefined &&
+                        that._handles.active != 'bottomRight') {
+                        return;
+                    }
+                    that._handles.active = 'bottomRight';
                     that._mouse = true;
-                    this.attrs.mouse = true;
                     console.log("bottomRight mousedown");
                 })
                 .on('mousemove touchmove', function () {
                     if (!that._mouse) return;
+                    if (that._handles.active != 'bottomRight') return;
                     that.cropEdges.rightX = that._stage.getPointerPosition().x;
                     that.cropEdges.bottomY = that._stage.getPointerPosition().y;
                     console.log("bottomRight mousemove");
+                    console.log(that._handles.active);
                 })
                 .on('mouseup touchend', function () {
                     if (!that._mouse) return;
                     that._mouse = false;
-                    this.attrs.mouse = false;
+                    that._handles.active = undefined;
                     console.log("bottomRight mouseup");
                 }),
 
             add: function () {
+                // Add crop handles to canvas
                 that._dynamicLayer.add(this.topLeft);
                 that._dynamicLayer.add(this.topRight);
                 that._dynamicLayer.add(this.bottomLeft);
                 that._dynamicLayer.add(this.bottomRight);
+            },
+
+            remove: function () {
+                // Remove crop handles from canvas
+                this.topLeft.remove();
+                this.topRight.remove();
+                this.bottomLeft.remove();
+                this.bottomRight.remove();
+            },
+
+            update: function () {
+                // Update crop handles
+                var edges = that.cropEdges;
+                this.topLeft.setX(edges.leftX - that.handleSize / 2);
+                this.topLeft.setY(edges.topY - that.handleSize / 2);
+                this.topRight.setX(edges.rightX - that.handleSize / 2);
+                this.topRight.setY(edges.topY - that.handleSize / 2);
+                this.bottomLeft.setX(edges.leftX - that.handleSize / 2);
+                this.bottomLeft.setY(edges.bottomY - that.handleSize / 2);
+                this.bottomRight.setX(edges.rightX - that.handleSize / 2);
+                this.bottomRight.setY(edges.bottomY - that.handleSize / 2);
             },
 
         }
@@ -325,10 +376,34 @@ CropJS.prototype = {
                 }),
 
             add: function () {
+                // Add non-selected region to canvas
                 that._dynamicLayer.add(this.left);
                 that._dynamicLayer.add(this.right);
                 that._dynamicLayer.add(this.top);
                 that._dynamicLayer.add(this.bottom);
+            },
+
+            remove: function () {
+                // Remove non-selected region from canvas
+                this.left.remove();
+                this.right.remove();
+                this.top.remove();
+                this.bottom.remove();
+            },
+
+            update: function () {
+                // Update non-selected region
+                var edges = that.cropEdges;
+                this.top.setX(edges.leftX);
+                this.top.setWidth(edges.rightX - edges.leftX);
+                this.top.setHeight(edges.topY);
+                this.bottom.setX(edges.leftX);
+                this.bottom.setY(edges.bottomY);
+                this.bottom.setWidth(edges.rightX - edges.leftX);
+                this.bottom.setHeight(that._stage.attrs.height - edges.bottomY);
+                this.left.setWidth(edges.leftX);
+                this.right.setX(edges.rightX);
+                this.right.setWidth(that._stage.attrs.width - edges.rightX);
             },
 
         }
@@ -352,12 +427,10 @@ CropJS.prototype = {
                 that.cropEdges.leftX = that.cropEdges.rightX;
                 that.cropEdges.rightX = temp;
                 // Swap handles
-                temp = that._handles.topLeft.attrs.mouse;
-                that._handles.topLeft.attrs.mouse = that._handles.topRight.attrs.mouse;
-                that._handles.topRight.attrs.mouse = temp;
-                temp = that._handles.bottomLeft.attrs.mouse;
-                that._handles.bottomLeft.attrs.mouse = that._handles.bottomRight.attrs.mouse;
-                that._handles.bottomRight.attrs.mouse = temp;
+                if (that._handles.active == 'topLeft') that._handles.active = 'topRight';
+                else if (that._handles.active == 'topRight') that._handles.active = 'topLeft';
+                else if (that._handles.active == 'bottomLeft') that._handles.active = 'bottomRight';
+                else if (that._handles.active == 'bottomRight') that._handles.active = 'bottomLeft';
             }
             if (that.cropEdges.topY > that.cropEdges.bottomY) {
                 // Swap edges
@@ -365,19 +438,17 @@ CropJS.prototype = {
                 that.cropEdges.topY = that.cropEdges.bottomY;
                 that.cropEdges.bottomY = temp;
                 // Swap handles
-                temp = that._handles.topLeft.attrs.mouse;
-                that._handles.topLeft.attrs.mouse = that._handles.bottomLeft.attrs.mouse;
-                that._handles.bottomLeft.attrs.mouse = temp;
-                temp = that._handles.topRight.attrs.mouse;
-                that._handles.topRight.attrs.mouse = that._handles.bottomRight.attrs.mouse;
-                that._handles.bottomRight.attrs.mouse = temp;
+                if (that._handles.active == 'topLeft') that._handles.active = 'bottomLeft';
+                else if (that._handles.active == 'topRight') that._handles.active = 'bottomRight';
+                else if (that._handles.active == 'bottomLeft') that._handles.active = 'topLeft';
+                else if (that._handles.active == 'bottomRight') that._handles.active = 'topRight';
             }
 
             // Implement handles
-            if (that._handles.topLeft.attrs.mouse) that._handles.topLeft.fire('mousemove');
-            if (that._handles.topRight.attrs.mouse) that._handles.topRight.fire('mousemove');
-            if (that._handles.bottomLeft.attrs.mouse) that._handles.bottomLeft.fire('mousemove');
-            if (that._handles.bottomRight.attrs.mouse) that._handles.bottomRight.fire('mousemove');
+            if (that._handles.active == 'topLeft') that._handles.topLeft.fire('mousemove');
+            if (that._handles.active == 'topRight') that._handles.topRight.fire('mousemove');
+            if (that._handles.active == 'bottomLeft') that._handles.bottomLeft.fire('mousemove');
+            if (that._handles.active == 'bottomRight') that._handles.bottomRight.fire('mousemove');
 
             // Implement selected region
 
@@ -386,6 +457,10 @@ CropJS.prototype = {
             that._updateSelectionRectangle();
 
         });
+
+        //this._stage.on('mouseout', function () {
+        //    that._mouse = false;
+        //});
 
     },
 
@@ -400,14 +475,8 @@ CropJS.prototype = {
     _removeSelectionRectangle: function() {
 
         this._selectionRectangle.remove();
-        this._handleTopLeft.remove();
-        this._handleTopRight.remove();
-        this._handleBottomLeft.remove();
-        this._handleBottomRight.remove();
-        this._maskLeft.remove();
-        this._maskRight.remove();
-        this._maskTop.remove();
-        this._maskBottom.remove();
+        this._handles.remove();
+        this._masks.remove();
 
     },
 
@@ -420,33 +489,15 @@ CropJS.prototype = {
             masks = this._masks,
             edges = this.cropEdges;
 
-        // Update Rectangle
+        // Update the Selection Rectangle
         rect.setX(edges.leftX);
         rect.setY(edges.topY);
         rect.setWidth(edges.rightX - edges.leftX);
         rect.setHeight(edges.bottomY - edges.topY);
 
-        // Update handles
-        handles.topLeft.setX(edges.leftX - this.handleSize / 2);
-        handles.topLeft.setY(edges.topY - this.handleSize / 2);
-        handles.topRight.setX(edges.rightX - this.handleSize / 2);
-        handles.topRight.setY(edges.topY - this.handleSize / 2);
-        handles.bottomLeft.setX(edges.leftX - this.handleSize / 2);
-        handles.bottomLeft.setY(edges.bottomY - this.handleSize / 2);
-        handles.bottomRight.setX(edges.rightX - this.handleSize / 2);
-        handles.bottomRight.setY(edges.bottomY - this.handleSize / 2);
+        this._handles.update();
 
-        // Update Masks
-        masks.top.setX(edges.leftX);
-        masks.top.setWidth(edges.rightX - edges.leftX);
-        masks.top.setHeight(edges.topY);
-        masks.bottom.setX(edges.leftX);
-        masks.bottom.setY(edges.bottomY);
-        masks.bottom.setWidth(edges.rightX - edges.leftX);
-        masks.bottom.setHeight(this._stage.attrs.height - edges.bottomY);
-        masks.left.setWidth(edges.leftX);
-        masks.right.setX(edges.rightX);
-        masks.right.setWidth(this._stage.attrs.width - edges.rightX);
+        this._masks.update();
 
         // draw Layer
         this._dynamicLayer.draw();
