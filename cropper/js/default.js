@@ -28,6 +28,8 @@ CropJS.prototype = {
 
     _mouse: false,
 
+    cropEdges: undefined,
+
     _initStage: function() {
 
         if (!this.width) this.width = this.background.width;
@@ -98,21 +100,41 @@ CropJS.prototype = {
 
         // Selection Rectangle
 
-        this._selectionRectangle = new Kinetic.Rect({
-            x: this.cropEdges.leftX,
-            y: this.cropEdges.topY,
-            width: this.cropEdges.rightX - this.cropEdges.leftX,
-            height: this.cropEdges.bottomY - this.cropEdges.topY,
-        });
-        this._selectionRectangle
-            .on('mouseover', function () {
-                document.body.style.cursor = 'move';
+        this._selectionRectangle = {
+
+            rect: new Kinetic.Rect({
+                x: this.cropEdges.leftX,
+                y: this.cropEdges.topY,
+                width: this.cropEdges.rightX - this.cropEdges.leftX,
+                height: this.cropEdges.bottomY - this.cropEdges.topY,
             })
-            .on('mouseout', function () {
-                document.body.style.cursor = 'default';
-            })
+                .on('mouseover', function () {
+                    document.body.style.cursor = 'move';
+                })
+                .on('mouseout', function () {
+                    document.body.style.cursor = 'default';
+                }),
+
+            add: function () {
+                // Add the selected region to the canvas
+                that._dynamicLayer.add(this.rect);
+            },
+
+            remove: function() {
+                this.rect.remove();
+            },
+
+            update: function () {
+                // Update the selected region
+                var edges = that.cropEdges;
+                this.rect.setX(edges.leftX);
+                this.rect.setY(edges.topY);
+                this.rect.setWidth(edges.rightX - edges.leftX);
+                this.rect.setHeight(edges.bottomY - edges.topY);
+            },
             
-        ;
+            
+        }
         
         // Crop Handles
         if (!this.handleSize) this.handleSize = 10;
@@ -414,7 +436,8 @@ CropJS.prototype = {
         var that = this;
 
         this._masks.add()
-        this._dynamicLayer.add(this._selectionRectangle);
+        this._selectionRectangle.add();
+        // this._dynamicLayer.add(this._selectionRectangle.rect);
         this._handles.add();
         this._dynamicLayer.draw();
 
@@ -483,20 +506,9 @@ CropJS.prototype = {
     
     _updateSelectionRectangle: function () {
 
-        // Convenience variables
-        var rect = this._selectionRectangle,
-            handles = this._handles,
-            masks = this._masks,
-            edges = this.cropEdges;
-
         // Update the Selection Rectangle
-        rect.setX(edges.leftX);
-        rect.setY(edges.topY);
-        rect.setWidth(edges.rightX - edges.leftX);
-        rect.setHeight(edges.bottomY - edges.topY);
-
+        this._selectionRectangle.update();
         this._handles.update();
-
         this._masks.update();
 
         // draw Layer
