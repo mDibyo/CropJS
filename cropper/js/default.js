@@ -70,7 +70,8 @@ CropJS.prototype = {
 
     _fullMask: {
 
-        init: function(canvas) {
+        init: function (canvas) {
+            // Initialize no selection for the canvas
 
             this.rect = new Kinetic.Rect({
                 x: 0,
@@ -90,8 +91,13 @@ CropJS.prototype = {
         },
 
         add: function (canvas) {
-            // Add full Mask to canvas
+            // Add no selection to the canvas
             canvas._dynamicLayer.add(this.rect);
+        },
+
+        remove: function (canvas) {
+            // Remove no selection from the canvas
+            this.rect.remove();
         },
 
     },
@@ -99,6 +105,7 @@ CropJS.prototype = {
     _selectionRectangle: {
 
         init: function (canvas) {
+            // Initialize a selection region for the canvas
             
             this.rect = new Kinetic.Rect({
                 x: canvas.cropEdges.leftX,
@@ -153,7 +160,7 @@ CropJS.prototype = {
         },
 
         update: function (canvas) {
-            // Update the selected region
+            // Update the selection region in the canvas
             var edges = canvas.cropEdges;
             this.rect.setX(edges.leftX);
             this.rect.setY(edges.topY);
@@ -166,6 +173,7 @@ CropJS.prototype = {
     _handles: {
 
         init: function (canvas) {
+            // Initialize crop handles for the canvas
             
             this.size = canvas.handleSize,
 
@@ -294,7 +302,7 @@ CropJS.prototype = {
         },
 
         add: function (canvas) {
-            // Add crop handles to canvas
+            // Add crop handles to the canvas
             canvas._dynamicLayer.add(this.topLeft);
             canvas._dynamicLayer.add(this.topRight);
             canvas._dynamicLayer.add(this.bottomLeft);
@@ -302,7 +310,7 @@ CropJS.prototype = {
         },
 
         remove: function (canvas) {
-            // Remove crop handles from canvas
+            // Remove crop handles from the canvas
             this.topLeft.remove();
             this.topRight.remove();
             this.bottomLeft.remove();
@@ -310,7 +318,7 @@ CropJS.prototype = {
         },
 
         update: function (canvas) {
-            // Update crop handles
+            // Update crop handles in the canvas
             var edges = canvas.cropEdges;
             this.topLeft.setX(edges.leftX - this.size / 2);
             this.topLeft.setY(edges.topY - this.size / 2);
@@ -326,7 +334,8 @@ CropJS.prototype = {
 
     _masks: {
   
-        init: function(canvas) {
+        init: function (canvas) {
+            // Initialize non-selected region for the canvas
 
             this.left = new Kinetic.Rect({
                 x: 0,
@@ -391,7 +400,7 @@ CropJS.prototype = {
         },
 
         add: function (canvas) {
-            // Add non-selected region to canvas
+            // Add non-selected region to the canvas
             canvas._dynamicLayer.add(this.left);
             canvas._dynamicLayer.add(this.right);
             canvas._dynamicLayer.add(this.top);
@@ -399,7 +408,7 @@ CropJS.prototype = {
         },
 
         remove: function (canvas) {
-            // Remove non-selected region from canvas
+            // Remove non-selected region from the canvas
             this.left.remove();
             this.right.remove();
             this.top.remove();
@@ -407,7 +416,7 @@ CropJS.prototype = {
         },
 
         update: function (canvas) {
-            // Update non-selected region
+            // Update non-selected region in the canvas
             var edges = canvas.cropEdges;
             this.top.setX(edges.leftX);
             this.top.setWidth(edges.rightX - edges.leftX);
@@ -423,7 +432,8 @@ CropJS.prototype = {
 
     },
 
-    _initStage: function() {
+    _initStage: function () {
+        // Initialize canvas
 
         if (!this.width) this.width = this.background.width;
         if (!this.height) this.height = this.background.height;
@@ -460,7 +470,8 @@ CropJS.prototype = {
         
     },
 
-    _initFullMask: function() {
+    _initFullMask: function () {
+        // Initialize mode 1: NO SELECTION for the canvas
 
         if (this.cropEdges) return;
 
@@ -470,6 +481,7 @@ CropJS.prototype = {
     },
 
     _addFullMask: function () {
+        // Add mode 1: NO SELECTION to the canvas
 
         this._fullMask.add(this);
         this._dynamicLayer.draw();
@@ -477,6 +489,7 @@ CropJS.prototype = {
     },
 
     _initSelectionRectangle: function() {
+        // Initialize mode 2: SELECTION for the canvas
 
         if (!this.cropEdges) return;
 
@@ -497,7 +510,8 @@ CropJS.prototype = {
     },
 
     _addSelectionRectangle: function() {
-        
+        // Add mode 2: SELECTION to the canvas
+
         var that = this;
 
         this._masks.add(this)
@@ -557,6 +571,7 @@ CropJS.prototype = {
     },
 
     _removeSelectionRectangle: function() {
+        // Remove mode 2: SELECTION from the canvas
 
         this._selectionRectangle.remove();
         this._handles.remove();
@@ -565,6 +580,7 @@ CropJS.prototype = {
     },
     
     _updateSelectionRectangle: function () {
+        // Update mode 2: SELECTION in the canvas
 
         // Update the Selection Rectangle
         this._selectionRectangle.update(this);
