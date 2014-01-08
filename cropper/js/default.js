@@ -68,6 +68,361 @@ CropJS.prototype = {
 
     cropEdges: undefined,
 
+    _fullMask: {
+
+        init: function(canvas) {
+
+            this.rect = new Kinetic.Rect({
+                x: 0,
+                y: 0,
+                width: canvas._stage.attrs.width,
+                height: canvas._stage.attrs.height,
+                fill: 'black',
+                opacity: 0.6,
+            })
+                .on('mouseover', function () {
+                    document.body.style.cursor = 'crosshair';
+                })
+                .on('mouseout', function () {
+                    document.body.style.cursor = 'default';
+                });
+
+        },
+
+        add: function (canvas) {
+            // Add full Mask to canvas
+            canvas._dynamicLayer.add(this.rect);
+        },
+
+    },
+
+    _selectionRectangle: {
+
+        init: function (canvas) {
+            
+            this.rect = new Kinetic.Rect({
+                x: canvas.cropEdges.leftX,
+                y: canvas.cropEdges.topY,
+                width: canvas.cropEdges.rightX - canvas.cropEdges.leftX,
+                height: canvas.cropEdges.bottomY - canvas.cropEdges.topY,
+            })
+            .on('mouseover', function () {
+                document.body.style.cursor = 'move';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            })
+            .on('mousedown touchstart', function () {
+                canvas._selectionRectangle.mouse = true;
+                canvas._selectionRectangle.initialPosition = canvas._stage.getPointerPosition();
+                canvas._selectionRectangle.initialEdges = new EdgeList(canvas.cropEdges);
+            })
+            .on('mousemove touchmove', function () {
+                if (!canvas._selectionRectangle.mouse) return;
+                // Calculate new position of selected region
+                canvas.cropEdges.leftX = canvas._selectionRectangle.initialEdges.leftX + (canvas._stage.getPointerPosition().x - canvas._selectionRectangle.initialPosition.x);
+                canvas.cropEdges.rightX = canvas._selectionRectangle.initialEdges.rightX + (canvas._stage.getPointerPosition().x - canvas._selectionRectangle.initialPosition.x);
+                canvas.cropEdges.topY = canvas._selectionRectangle.initialEdges.topY + (canvas._stage.getPointerPosition().y - canvas._selectionRectangle.initialPosition.y);
+                canvas.cropEdges.bottomY = canvas._selectionRectangle.initialEdges.bottomY + (canvas._stage.getPointerPosition().y - canvas._selectionRectangle.initialPosition.y);
+                // Apply constraints
+                if (canvas.cropEdges.leftX < 0) canvas.cropEdges.leftX = 0;
+                if (canvas.cropEdges.leftX > (canvas._stage.attrs.width - this.attrs.width)) canvas.cropEdges.leftX = canvas._stage.attrs.width - this.attrs.width;
+                if (canvas.cropEdges.rightX < this.attrs.width) canvas.cropEdges.rightX = this.attrs.width;
+                if (canvas.cropEdges.rightX > canvas._stage.attrs.width) canvas.cropEdges.rightX = canvas._stage.attrs.width;
+                if (canvas.cropEdges.topY < 0) canvas.cropEdges.topY = 0;
+                if (canvas.cropEdges.topY > (canvas._stage.attrs.height - this.attrs.height)) canvas.cropEdges.topY = canvas._stage.attrs.height - this.attrs.height;
+                if (canvas.cropEdges.bottomY < this.attrs.height) canvas.cropEdges.bottomY = this.attrs.height;
+                if (canvas.cropEdges.bottomY > canvas._stage.attrs.height) canvas.cropEdges.bottomY = canvas._stage.attrs.height;
+            })
+            .on('mouseup touchend', function () {
+                if (!canvas._selectionRectangle.mouse) return;
+                canvas._selectionRectangle.mouse = false;
+                canvas._selectionRectangle.initialPosition = undefined;
+                canvas._selectionRectangle.initialEdges = undefined;
+            });
+        },
+
+        add: function (canvas) {
+            // Add a selection region to the canvas
+            canvas._dynamicLayer.add(this.rect);
+        },
+
+        remove: function (canvas) {
+            // Remove a selection region from the canvas
+            this.rect.remove();
+        },
+
+        update: function (canvas) {
+            // Update the selected region
+            var edges = canvas.cropEdges;
+            this.rect.setX(edges.leftX);
+            this.rect.setY(edges.topY);
+            this.rect.setWidth(edges.rightX - edges.leftX);
+            this.rect.setHeight(edges.bottomY - edges.topY);
+        },
+            
+    },
+
+    _handles: {
+
+        init: function (canvas) {
+            
+            this.size = canvas.handleSize,
+
+            this.active = undefined,
+
+            this.topLeft = new Kinetic.Rect({
+                x: canvas.cropEdges.leftX - canvas.handleSize / 2,
+                y: canvas.cropEdges.topY - canvas.handleSize / 2,
+                width: this.size,
+                height: this.size,
+                fill: canvas.selectionRectangleColor,
+                mouse: false,
+            })
+                .on('mouseover', function () {
+                    document.body.style.cursor = 'nw-resize';
+                })
+                .on('mouseout', function () {
+                    document.body.style.cursor = 'default';
+                })
+                .on('mousedown touchstart', function () {
+                    if (canvas._handles.active != undefined &&
+                        canvas._handles.active != 'topLeft') {
+                        return;
+                    }
+                    canvas._handles.active = 'topLeft';
+                })
+                .on('mousemove touchmove', function () {
+                    if (canvas._handles.active != 'topLeft') return;
+                    canvas.cropEdges.leftX = canvas._stage.getPointerPosition().x;
+                    canvas.cropEdges.topY = canvas._stage.getPointerPosition().y;
+                })
+                .on('mouseup touchend', function () {
+                    canvas._handles.active = undefined;
+                });
+
+            this.topRight = new Kinetic.Rect({
+                x: canvas.cropEdges.rightX - this.size / 2,
+                y: canvas.cropEdges.topY - this.size / 2,
+                width: this.size,
+                height: this.size,
+                fill: canvas.selectionRectangleColor,
+                mouse: false,
+            })
+                .on('mouseover', function () {
+                    document.body.style.cursor = 'ne-resize';
+                })
+                .on('mouseout', function () {
+                    document.body.style.cursor = 'default';
+                })
+                .on('mousedown touchstart', function () {
+                    if (canvas._handles.active != undefined &&
+                        canvas._handles.active != 'topRight') {
+                        return;
+                    }
+                    canvas._handles.active = 'topRight';
+                })
+                .on('mousemove touchmove', function () {
+                    if (canvas._handles.active != 'topRight') return;
+                    canvas.cropEdges.rightX = canvas._stage.getPointerPosition().x;
+                    canvas.cropEdges.topY = canvas._stage.getPointerPosition().y;
+                })
+                .on('mouseup touchend', function () {
+                    canvas._handles.active = undefined;
+                });
+
+            this.bottomLeft = new Kinetic.Rect({
+                x: canvas.cropEdges.leftX - this.size / 2,
+                y: canvas.cropEdges.bottomY - this.size / 2,
+                width: this.size,
+                height: this.size,
+                fill: canvas.selectionRectangleColor,
+                mouse: false,
+            })
+                .on('mouseover', function () {
+                    document.body.style.cursor = 'sw-resize';
+                })
+                .on('mouseout', function () {
+                    document.body.style.cursor = 'default';
+                })
+                .on('mousedown touchstart', function () {
+                    if (canvas._handles.active != undefined &&
+                        canvas._handles.active != 'bottomLeft') {
+                        return;
+                    }
+                    canvas._handles.active = 'bottomLeft';
+                })
+                .on('mousemove touchmove', function () {
+                    if (canvas._handles.active != 'bottomLeft') return;
+                    canvas.cropEdges.leftX = canvas._stage.getPointerPosition().x;
+                    canvas.cropEdges.bottomY = canvas._stage.getPointerPosition().y;
+                })
+                .on('mouseup touchend', function () {
+                    canvas._handles.active = undefined;
+                });
+
+            this.bottomRight = new Kinetic.Rect({
+                x: canvas.cropEdges.rightX - this.size / 2,
+                y: canvas.cropEdges.bottomY - this.size / 2,
+                width: this.size,
+                height: this.size,
+                fill: canvas.selectionRectangleColor,
+                mouse: false,
+            })
+                .on('mouseover', function () {
+                    document.body.style.cursor = 'se-resize';
+                })
+                .on('mouseout', function () {
+                    document.body.style.cursor = 'default';
+                })
+                .on('mousedown touchstart', function () {
+                    if (canvas._handles.active != undefined &&
+                        canvas._handles.active != 'bottomRight') {
+                        return;
+                    }
+                    canvas._handles.active = 'bottomRight';
+                })
+                .on('mousemove touchmove', function () {
+                    if (canvas._handles.active != 'bottomRight') return;
+                    canvas.cropEdges.rightX = canvas._stage.getPointerPosition().x;
+                    canvas.cropEdges.bottomY = canvas._stage.getPointerPosition().y;
+                })
+                .on('mouseup touchend', function () {
+                    canvas._handles.active = undefined;
+                });
+            
+        },
+
+        add: function (canvas) {
+            // Add crop handles to canvas
+            canvas._dynamicLayer.add(this.topLeft);
+            canvas._dynamicLayer.add(this.topRight);
+            canvas._dynamicLayer.add(this.bottomLeft);
+            canvas._dynamicLayer.add(this.bottomRight);
+        },
+
+        remove: function (canvas) {
+            // Remove crop handles from canvas
+            this.topLeft.remove();
+            this.topRight.remove();
+            this.bottomLeft.remove();
+            this.bottomRight.remove();
+        },
+
+        update: function (canvas) {
+            // Update crop handles
+            var edges = canvas.cropEdges;
+            this.topLeft.setX(edges.leftX - this.size / 2);
+            this.topLeft.setY(edges.topY - this.size / 2);
+            this.topRight.setX(edges.rightX - this.size / 2);
+            this.topRight.setY(edges.topY - this.size / 2);
+            this.bottomLeft.setX(edges.leftX - this.size / 2);
+            this.bottomLeft.setY(edges.bottomY - this.size / 2);
+            this.bottomRight.setX(edges.rightX - this.size / 2);
+            this.bottomRight.setY(edges.bottomY - this.size / 2);
+        },
+
+    },
+
+    _masks: {
+  
+        init: function(canvas) {
+
+            this.left = new Kinetic.Rect({
+                x: 0,
+                y: 0,
+                width: canvas.cropEdges.leftX,
+                height: canvas.height,
+                fill: 'black',
+                opacity: canvas.opacity,
+            })
+            .on('mouseover', function () {
+                document.body.style.cursor = 'crosshair';
+            })
+            .on('mouseout', function () {
+                document.body.style.cursor = 'default';
+            });
+
+            this.right = new Kinetic.Rect({
+                x: canvas.cropEdges.rightX,
+                y: 0,
+                width: canvas.width - canvas.cropEdges.rightX,
+                height: canvas.height,
+                fill: 'black',
+                opacity: canvas.opacity,
+            })
+                .on('mouseover', function () {
+                    document.body.style.cursor = 'crosshair';
+                })
+                .on('mouseout', function () {
+                    document.body.style.cursor = 'default';
+                });
+
+            this.top = new Kinetic.Rect({
+                x: canvas.cropEdges.leftX,
+                y: 0,
+                width: canvas.cropEdges.rightX - canvas.cropEdges.leftX,
+                height: canvas.cropEdges.topY,
+                fill: 'black',
+                opacity: canvas.opacity,
+            })
+                .on('mouseover', function () {
+                    document.body.style.cursor = 'crosshair';
+                })
+                .on('mouseout', function () {
+                    document.body.style.cursor = 'default';
+                });
+
+            this.bottom = new Kinetic.Rect({
+                x: canvas.cropEdges.leftX,
+                y: canvas.cropEdges.bottomY,
+                width: canvas.cropEdges.rightX - canvas.cropEdges.leftX,
+                height: canvas.height - canvas.cropEdges.bottomY,
+                fill: 'black',
+                opacity: canvas.opacity,
+            })
+                .on('mouseover', function () {
+                    document.body.style.cursor = 'crosshair';
+                })
+                .on('mouseout', function () {
+                    document.body.style.cursor = 'default';
+                });
+
+        },
+
+        add: function (canvas) {
+            // Add non-selected region to canvas
+            canvas._dynamicLayer.add(this.left);
+            canvas._dynamicLayer.add(this.right);
+            canvas._dynamicLayer.add(this.top);
+            canvas._dynamicLayer.add(this.bottom);
+        },
+
+        remove: function (canvas) {
+            // Remove non-selected region from canvas
+            this.left.remove();
+            this.right.remove();
+            this.top.remove();
+            this.bottom.remove();
+        },
+
+        update: function (canvas) {
+            // Update non-selected region
+            var edges = canvas.cropEdges;
+            this.top.setX(edges.leftX);
+            this.top.setWidth(edges.rightX - edges.leftX);
+            this.top.setHeight(edges.topY);
+            this.bottom.setX(edges.leftX);
+            this.bottom.setY(edges.bottomY);
+            this.bottom.setWidth(edges.rightX - edges.leftX);
+            this.bottom.setHeight(canvas._stage.attrs.height - edges.bottomY);
+            this.left.setWidth(edges.leftX);
+            this.right.setX(edges.rightX);
+            this.right.setWidth(canvas._stage.attrs.width - edges.rightX);
+        },
+
+    },
+
     _initStage: function() {
 
         if (!this.width) this.width = this.background.width;
@@ -93,372 +448,61 @@ CropJS.prototype = {
         this._stage.add(this._staticLayer);
 
         this._dynamicLayer = new Kinetic.Layer();
-        this._fullMask = new Kinetic.Rect({
-            x: 0,
-            y: 0,
-            width: this.width,
-            height: this.height,
-            fill: 'black',
-            opacity: 0.6,
-        })
-        .on('mouseover', function () {
-            document.body.style.cursor = 'crosshair';
-        })
-        .on('mouseout', function () {
-            document.body.style.cursor = 'default';
-        });
-        this._dynamicLayer.add(this._fullMask);
         this._stage.add(this._dynamicLayer);
-        if (this.cropEdges.defined) {
+
+        if (this.cropEdges) {
             this._initSelectionRectangle();
             this._addSelectionRectangle();
-            this._addDragListeners();
+        } else {
+            this._initFullMask();
+            this._addFullMask();
         }
         
+    },
+
+    _initFullMask: function() {
+
+        if (this.cropEdges) return;
+
+        // Full Mask
+        this._fullMask.init(this);
+
+    },
+
+    _addFullMask: function () {
+
+        this._fullMask.add(this);
+        this._dynamicLayer.draw();
+
     },
 
     _initSelectionRectangle: function() {
 
         if (!this.cropEdges) return;
 
-        this._fullMask.remove();
         var that = this;
 
         // Selection Rectangle
-
-        this._selectionRectangle = {
-
-            rect: new Kinetic.Rect({
-                x: this.cropEdges.leftX,
-                y: this.cropEdges.topY,
-                width: this.cropEdges.rightX - this.cropEdges.leftX,
-                height: this.cropEdges.bottomY - this.cropEdges.topY,
-            })
-                .on('mouseover', function () {
-                    document.body.style.cursor = 'move';
-                })
-                .on('mouseout', function () {
-                    document.body.style.cursor = 'default';
-                })
-                .on('mousedown touchstart', function () {
-                    that._selectionRectangle.mouse = true;
-                    that._selectionRectangle.initialPosition = that._stage.getPointerPosition();
-                    that._selectionRectangle.initialEdges = new EdgeList(that.cropEdges);
-                })
-                .on('mousemove touchmove', function () {
-                    if (!that._selectionRectangle.mouse) return;
-                    // Calculate new position of selected region
-                    that.cropEdges.leftX = that._selectionRectangle.initialEdges.leftX + (that._stage.getPointerPosition().x - that._selectionRectangle.initialPosition.x);
-                    that.cropEdges.rightX = that._selectionRectangle.initialEdges.rightX + (that._stage.getPointerPosition().x - that._selectionRectangle.initialPosition.x);
-                    that.cropEdges.topY = that._selectionRectangle.initialEdges.topY + (that._stage.getPointerPosition().y - that._selectionRectangle.initialPosition.y);
-                    that.cropEdges.bottomY = that._selectionRectangle.initialEdges.bottomY + (that._stage.getPointerPosition().y - that._selectionRectangle.initialPosition.y);
-                    // Apply constraints
-                    if (that.cropEdges.leftX < 0) that.cropEdges.leftX = 0;
-                    if (that.cropEdges.leftX > (that._stage.attrs.width - this.attrs.width)) that.cropEdges.leftX = that._stage.attrs.width - this.attrs.width;
-                    if (that.cropEdges.rightX < this.attrs.width) that.cropEdges.rightX = this.attrs.width;
-                    if (that.cropEdges.rightX > that._stage.attrs.width) that.cropEdges.rightX = that._stage.attrs.width;
-                    if (that.cropEdges.topY < 0) that.cropEdges.topY = 0;
-                    if (that.cropEdges.topY > (that._stage.attrs.height - this.attrs.height)) that.cropEdges.topY = that._stage.attrs.height - this.attrs.height;
-                    if (that.cropEdges.bottomY < this.attrs.height) that.cropEdges.bottomY = this.attrs.height;
-                    if (that.cropEdges.bottomY > that._stage.attrs.height) that.cropEdges.bottomY = that._stage.attrs.height;
-                })
-                .on('mouseup touchend', function () {
-                    if (!that._selectionRectangle.mouse) return;
-                    that._selectionRectangle.mouse = false;
-                    that._selectionRectangle.initialPosition = undefined;
-                    that._selectionRectangle.initialEdges = undefined;
-                })
-            ,
-
-            add: function () {
-                // Add a selection region to the canvas
-                that._dynamicLayer.add(this.rect);
-            },
-
-            remove: function () {
-                // Remove a selection region from the canvas
-                this.rect.remove();
-            },
-
-            update: function () {
-                // Update the selected region
-                var edges = that.cropEdges;
-                this.rect.setX(edges.leftX);
-                this.rect.setY(edges.topY);
-                this.rect.setWidth(edges.rightX - edges.leftX);
-                this.rect.setHeight(edges.bottomY - edges.topY);
-            },
-            
-            
-        }
+        this._selectionRectangle.init(this);
         
         // Crop Handles
         if (!this.handleSize) this.handleSize = 10;
         console.log(this);
-
-        this._handles = {
-
-            size: this.handleSize,
-
-            active: undefined,
-
-            topLeft: new Kinetic.Rect({
-                x: this.cropEdges.leftX - this.handleSize / 2,
-                y: this.cropEdges.topY - this.handleSize / 2,
-                width: this.handleSize,
-                height: this.handleSize,
-                fill: this.selectionRectangleColor,
-                mouse: false,
-            })
-                .on('mouseover', function () {
-                    document.body.style.cursor = 'nw-resize';
-                })
-                .on('mouseout', function () {
-                    document.body.style.cursor = 'default';
-                })
-                .on('mousedown touchstart', function () {
-                    if (that._handles.active != undefined &&
-                        that._handles.active != 'topLeft') {
-                        return;
-                    }
-                    that._handles.active = 'topLeft';
-                })
-                .on('mousemove touchmove', function () {
-                    if (that._handles.active != 'topLeft') return;
-                    that.cropEdges.leftX = that._stage.getPointerPosition().x;
-                    that.cropEdges.topY = that._stage.getPointerPosition().y;
-                })
-                .on('mouseup touchend', function () {
-                    that._handles.active = undefined;
-                }),
-
-            topRight: new Kinetic.Rect({
-                x: this.cropEdges.rightX - this.handleSize / 2,
-                y: this.cropEdges.topY - this.handleSize / 2,
-                width: this.handleSize,
-                height: this.handleSize,
-                fill: this.selectionRectangleColor,
-                mouse: false,
-            })
-                .on('mouseover', function () {
-                    document.body.style.cursor = 'ne-resize';
-                })
-                .on('mouseout', function () {
-                    document.body.style.cursor = 'default';
-                })
-                .on('mousedown touchstart', function () {
-                    if (that._handles.active != undefined &&
-                        that._handles.active != 'topRight') {
-                        return;
-                    }
-                    that._handles.active = 'topRight';
-                })
-                .on('mousemove touchmove', function () {
-                    if (that._handles.active != 'topRight') return;
-                    that.cropEdges.rightX = that._stage.getPointerPosition().x;
-                    that.cropEdges.topY = that._stage.getPointerPosition().y;
-                })
-                .on('mouseup touchend', function () {
-                    that._handles.active = undefined;
-                }),
-
-            bottomLeft: new Kinetic.Rect({
-                x: this.cropEdges.leftX - this.handleSize / 2,
-                y: this.cropEdges.bottomY - this.handleSize / 2,
-                width: this.handleSize,
-                height: this.handleSize,
-                fill: this.selectionRectangleColor,
-                mouse: false,
-            })
-                .on('mouseover', function () {
-                    document.body.style.cursor = 'sw-resize';
-                })
-                .on('mouseout', function () {
-                    document.body.style.cursor = 'default';
-                })
-                .on('mousedown touchstart', function () {
-                    if (that._handles.active != undefined &&
-                        that._handles.active != 'bottomLeft') {
-                        return;
-                    }
-                    that._handles.active = 'bottomLeft';
-                })
-                .on('mousemove touchmove', function () {
-                    if (that._handles.active != 'bottomLeft') return;
-                    that.cropEdges.leftX = that._stage.getPointerPosition().x;
-                    that.cropEdges.bottomY = that._stage.getPointerPosition().y;
-                })
-                .on('mouseup touchend', function () {
-                    that._handles.active = undefined;
-                }),
-
-            bottomRight: new Kinetic.Rect({
-                x: this.cropEdges.rightX - this.handleSize / 2,
-                y: this.cropEdges.bottomY - this.handleSize / 2,
-                width: this.handleSize,
-                height: this.handleSize,
-                fill: this.selectionRectangleColor,
-                mouse: false,
-            })
-                .on('mouseover', function () {
-                    document.body.style.cursor = 'se-resize';
-                })
-                .on('mouseout', function () {
-                    document.body.style.cursor = 'default';
-                })
-                .on('mousedown touchstart', function () {
-                    if (that._handles.active != undefined &&
-                        that._handles.active != 'bottomRight') {
-                        return;
-                    }
-                    that._handles.active = 'bottomRight';
-                })
-                .on('mousemove touchmove', function () {
-                    if (that._handles.active != 'bottomRight') return;
-                    that.cropEdges.rightX = that._stage.getPointerPosition().x;
-                    that.cropEdges.bottomY = that._stage.getPointerPosition().y;
-                })
-                .on('mouseup touchend', function () {
-                    that._handles.active = undefined;
-                }),
-
-            add: function () {
-                // Add crop handles to canvas
-                that._dynamicLayer.add(this.topLeft);
-                that._dynamicLayer.add(this.topRight);
-                that._dynamicLayer.add(this.bottomLeft);
-                that._dynamicLayer.add(this.bottomRight);
-            },
-
-            remove: function () {
-                // Remove crop handles from canvas
-                this.topLeft.remove();
-                this.topRight.remove();
-                this.bottomLeft.remove();
-                this.bottomRight.remove();
-            },
-
-            update: function () {
-                // Update crop handles
-                var edges = that.cropEdges;
-                this.topLeft.setX(edges.leftX - that.handleSize / 2);
-                this.topLeft.setY(edges.topY - that.handleSize / 2);
-                this.topRight.setX(edges.rightX - that.handleSize / 2);
-                this.topRight.setY(edges.topY - that.handleSize / 2);
-                this.bottomLeft.setX(edges.leftX - that.handleSize / 2);
-                this.bottomLeft.setY(edges.bottomY - that.handleSize / 2);
-                this.bottomRight.setX(edges.rightX - that.handleSize / 2);
-                this.bottomRight.setY(edges.bottomY - that.handleSize / 2);
-            },
-
-        }
+        this._handles.init(this);        
         
         // Masks
         if (!this.opacity) this.opacity = 0.6;
-        this._masks = {
-  
-            left: new Kinetic.Rect({
-                x: 0,
-                y: 0,
-                width: this.cropEdges.leftX,
-                height: this.height,
-                fill: 'black',
-                opacity: this.opacity,
-            })
-                .on('mouseover', function () {
-                    document.body.style.cursor = 'crosshair';
-                })
-                .on('mouseout', function () {
-                    document.body.style.cursor = 'default';
-                }),
-
-            right: new Kinetic.Rect({
-                x: this.cropEdges.rightX,
-                y: 0,
-                width: this.width - this.cropEdges.rightX,
-                height: this.height,
-                fill: 'black',
-                opacity: this.opacity,
-            })
-                .on('mouseover', function () {
-                    document.body.style.cursor = 'crosshair';
-                })
-                .on('mouseout', function () {
-                    document.body.style.cursor = 'default';
-                }),
-
-            top: new Kinetic.Rect({
-                x: this.cropEdges.leftX,
-                y: 0,
-                width: this.cropEdges.rightX - this.cropEdges.leftX,
-                height: this.cropEdges.topY,
-                fill: 'black',
-                opacity: this.opacity,
-            })
-                .on('mouseover', function () {
-                    document.body.style.cursor = 'crosshair';
-                })
-                .on('mouseout', function () {
-                    document.body.style.cursor = 'default';
-                }),
-
-            bottom: new Kinetic.Rect({
-                x: this.cropEdges.leftX,
-                y: this.cropEdges.bottomY,
-                width: this.cropEdges.rightX - this.cropEdges.leftX,
-                height: this.height - this.cropEdges.bottomY,
-                fill: 'black',
-                opacity: this.opacity,
-            })
-                .on('mouseover', function () {
-                    document.body.style.cursor = 'crosshair';
-                })
-                .on('mouseout', function () {
-                    document.body.style.cursor = 'default';
-                }),
-
-            add: function () {
-                // Add non-selected region to canvas
-                that._dynamicLayer.add(this.left);
-                that._dynamicLayer.add(this.right);
-                that._dynamicLayer.add(this.top);
-                that._dynamicLayer.add(this.bottom);
-            },
-
-            remove: function () {
-                // Remove non-selected region from canvas
-                this.left.remove();
-                this.right.remove();
-                this.top.remove();
-                this.bottom.remove();
-            },
-
-            update: function () {
-                // Update non-selected region
-                var edges = that.cropEdges;
-                this.top.setX(edges.leftX);
-                this.top.setWidth(edges.rightX - edges.leftX);
-                this.top.setHeight(edges.topY);
-                this.bottom.setX(edges.leftX);
-                this.bottom.setY(edges.bottomY);
-                this.bottom.setWidth(edges.rightX - edges.leftX);
-                this.bottom.setHeight(that._stage.attrs.height - edges.bottomY);
-                this.left.setWidth(edges.leftX);
-                this.right.setX(edges.rightX);
-                this.right.setWidth(that._stage.attrs.width - edges.rightX);
-            },
-
-        }
+        this._masks.init(this);
+        
     },
 
     _addSelectionRectangle: function() {
         
         var that = this;
 
-        this._masks.add()
-        this._selectionRectangle.add();
-        // this._dynamicLayer.add(this._selectionRectangle.rect);
-        this._handles.add();
+        this._masks.add(this)
+        this._selectionRectangle.add(this);
+        this._handles.add(this);
         this._dynamicLayer.draw();
 
         this._stage.on('mousemove touchmove', function () {
@@ -512,14 +556,6 @@ CropJS.prototype = {
 
     },
 
-    _addDragListeners: function() {
-
-        var mouse = false;
-        var that = this;
-        
-
-    },
-
     _removeSelectionRectangle: function() {
 
         this._selectionRectangle.remove();
@@ -527,14 +563,13 @@ CropJS.prototype = {
         this._masks.remove();
 
     },
-
     
     _updateSelectionRectangle: function () {
 
         // Update the Selection Rectangle
-        this._selectionRectangle.update();
-        this._handles.update();
-        this._masks.update();
+        this._selectionRectangle.update(this);
+        this._handles.update(this);
+        this._masks.update(this);
 
         // draw Layer
         this._dynamicLayer.draw();
