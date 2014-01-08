@@ -73,20 +73,8 @@ CropJS.prototype = {
         if (!this.width) this.width = this.background.width;
         if (!this.height) this.height = this.background.height;
         if (this.cropEdges) {
-            //var that = this;
-            //this.cropEdges.normalize = function() {
-            //    if (this.leftX < 1 && this.rightX < 1) {
-            //        this.leftX *= that.width;
-            //        this.rightX *= that.width;
-            //    }
-            //    if (this.topY < 1 && this.bottomY < 1) {
-            //        this.topY *= that.height;
-            //        this.bottomY *= that.height;
-            //    }
-            //}
             this.cropEdges.denormalize(this);
         }
-        console.log("1");
         this._stage = new Kinetic.Stage({
             container: this.imageContainerID,
             width: this.width,
@@ -155,10 +143,7 @@ CropJS.prototype = {
                 .on('mousedown touchstart', function () {
                     that._selectionRectangle.mouse = true;
                     that._selectionRectangle.initialPosition = that._stage.getPointerPosition();
-                    console.log(that._selectionRectangle.initialPosition);
                     that._selectionRectangle.initialEdges = new EdgeList(that.cropEdges);
-                    console.log(that._selectionRectangle.initialEdges);
-                    console.log("selectionRectangle mousedown");
                 })
                 .on('mousemove touchmove', function () {
                     if (!that._selectionRectangle.mouse) return;
@@ -180,13 +165,8 @@ CropJS.prototype = {
                 .on('mouseup touchend', function () {
                     if (!that._selectionRectangle.mouse) return;
                     that._selectionRectangle.mouse = false;
-                    console.log(that._selectionRectangle.initialPosition);
-                    console.log(that._selectionRectangle.initialEdges);
-
                     that._selectionRectangle.initialPosition = undefined;
                     that._selectionRectangle.initialEdges = undefined;
-                    console.log("selectionRectangle mouseup");
-                    
                 })
             ,
 
