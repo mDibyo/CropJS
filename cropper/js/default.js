@@ -486,14 +486,14 @@ CropJS.prototype = {
         this._fullMask.add(this);
         this._dynamicLayer.draw();
 
+
+
     },
 
     _initSelectionRectangle: function() {
         // Initialize mode 2: SELECTION for the canvas
 
         if (!this.cropEdges) return;
-
-        var that = this;
 
         // Selection Rectangle
         this._selectionRectangle.init(this);
