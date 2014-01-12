@@ -36,12 +36,12 @@ EdgeList.prototype = {
 }
 
 
-function CropJS(cropObject) {
+function CropJS(config) {
 
     var that = this
 
     // Check if required/optional attributes are present
-    for (var attr in cropObject) this[attr] = cropObject[attr];
+    for (var attr in config) this[attr] = config[attr];
     if (!this.imageSrc) {
         console.log("required attribute imageSrc not defined");
         return;
@@ -350,6 +350,12 @@ CropJS.prototype = {
             })
             .on('mouseout', function () {
                 document.body.style.cursor = 'default';
+            })
+            .on('mousedown touchstart', function () {
+                canvas._handles.active = 'bottomRight';
+                canvas.cropEdges.leftX = canvas.cropEdges.rightX = canvas._stage.getPointerPosition().x;
+                canvas.cropEdges.topY = canvas.cropEdges.bottomY = canvas._stage.getPointerPosition().y;
+                canvas._updateSelectionRectangle();
             });
 
             this.right = new Kinetic.Rect({
@@ -365,6 +371,12 @@ CropJS.prototype = {
                 })
                 .on('mouseout', function () {
                     document.body.style.cursor = 'default';
+                })
+                .on('mousedown touchstart', function () {
+                    canvas._handles.active = 'bottomRight';
+                    canvas.cropEdges.leftX = canvas.cropEdges.rightX = canvas._stage.getPointerPosition().x;
+                    canvas.cropEdges.topY = canvas.cropEdges.bottomY = canvas._stage.getPointerPosition().y;
+                    canvas._updateSelectionRectangle();
                 });
 
             this.top = new Kinetic.Rect({
@@ -380,6 +392,12 @@ CropJS.prototype = {
                 })
                 .on('mouseout', function () {
                     document.body.style.cursor = 'default';
+                })
+                .on('mousedown touchstart', function () {
+                    canvas._handles.active = 'bottomRight';
+                    canvas.cropEdges.leftX = canvas.cropEdges.rightX = canvas._stage.getPointerPosition().x;
+                    canvas.cropEdges.topY = canvas.cropEdges.bottomY = canvas._stage.getPointerPosition().y;
+                    canvas._updateSelectionRectangle();
                 });
 
             this.bottom = new Kinetic.Rect({
@@ -395,7 +413,13 @@ CropJS.prototype = {
                 })
                 .on('mouseout', function () {
                     document.body.style.cursor = 'default';
-                });
+                })
+                .on('mousedown touchstart', function () {
+                    canvas._handles.active = 'bottomRight';
+                    canvas.cropEdges.leftX = canvas.cropEdges.rightX = canvas._stage.getPointerPosition().x;
+                    canvas.cropEdges.topY = canvas.cropEdges.bottomY = canvas._stage.getPointerPosition().y;
+                    canvas._updateSelectionRectangle();
+                });            
 
         },
 
@@ -555,6 +579,7 @@ CropJS.prototype = {
             if (that._selectionRectangle.mouse) that._selectionRectangle.rect.fire('mousemove');
 
             // Implement unselected region
+            
 
             that._updateSelectionRectangle();
 
