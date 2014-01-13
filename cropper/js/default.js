@@ -624,6 +624,8 @@ CropJS.prototype = {
         this._handles.remove();
         this._masks.remove();
 
+        this._stage.off('mousemove touchmove');
+
     },
     
     _updateSelectionRectangle: function () {
@@ -641,6 +643,17 @@ CropJS.prototype = {
 
     setCursor: function(cursorStyle) {
         document.getElementById(this.imageContainerID).style.cursor = cursorStyle;
+    },
+
+    clearSelection: function() {
+
+        if (this._selectionRectangle.rect) this._removeSelectionRectangle();
+        if (this._fullMask.rect) this._removeFullMask();
+
+        this.cropEdges = undefined;
+        this._initFullMask();
+        this._addFullMask();
+
     },
 
     cut: function () {

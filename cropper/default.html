@@ -11,6 +11,7 @@
 <body>
     <div id="container"></div>
     <button onclick="cropObj.cut()">Crop</button>
+    <button onclick="cropObj.clearSelection()">Clear</button>
     <script type="text/javascript" src="./js/kinetic-v4.7.4.min.js"></script>
     <script type="text/javascript" src="./js/default.js"></script>
     <script type="text/javascript">
@@ -19,7 +20,7 @@
             imageContainerID: "container",
             // width: 600,
             // height: 200,
-        /*    cropEdges: new EdgeList({
+            /* cropEdges: new EdgeList({
                 topY: 0.2,
                 bottomY: 0.5,
                 leftX: 0.2,
