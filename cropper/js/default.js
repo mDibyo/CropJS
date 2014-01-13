@@ -86,7 +86,21 @@ CropJS.prototype = {
                 })
                 .on('mouseout', function () {
                     document.body.style.cursor = 'default';
-                });
+                })
+                .on('mousedown touchstart', function () {
+                    canvas.cropEdges = {
+                        leftX: canvas._stage.getPointerPosition().x,
+                        rightX: canvas._stage.getPointerPosition().x,
+                        topY: canvas._stage.getPointerPosition().y,
+                        bottomY: canvas._stage.getPointerPosition().y,
+                    };
+                    canvas._initSelectionRectangle();
+                    canvas._addSelectionRectangle();
+                    canvas._handles.active = 'bottomRight';
+                    canvas._removeFullMask()
+                })
+
+            ;
 
         },
 
@@ -484,6 +498,8 @@ CropJS.prototype = {
         this._dynamicLayer = new Kinetic.Layer();
         this._stage.add(this._dynamicLayer);
 
+        this._initFullMask();
+
         if (this.cropEdges) {
             this._initSelectionRectangle();
             this._addSelectionRectangle();
@@ -510,7 +526,12 @@ CropJS.prototype = {
         this._fullMask.add(this);
         this._dynamicLayer.draw();
 
+    },
 
+    _removeFullMask: function () {
+
+        this._fullMask.remove();
+        this._dynamicLayer.draw();
 
     },
 
@@ -542,6 +563,7 @@ CropJS.prototype = {
         this._selectionRectangle.add(this);
         this._handles.add(this);
         this._dynamicLayer.draw();
+        this._updateSelectionRectangle();
 
         this._stage.on('mousemove touchmove', function () {
 
@@ -589,9 +611,9 @@ CropJS.prototype = {
             that._selectionRectangle.mouse = false;
             that._handles.active = undefined;
         });
-        //this._stage.on('mouseout', function () {
-        //    that._mouse = false;
-        //});
+        this._stage.on('mouseout', function () {
+            that._mouse = false;
+        });
 
     },
 
