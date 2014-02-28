@@ -1,8 +1,8 @@
 ﻿/**
- * CropJS ---------------------- DOCUMENTATION NOT COMPLETE
- * This is a JavaScript widget that adds end-user cropping functionality to any image
- * on a webpage with a number of configurable options. It makes use of the KineticJS library. 
- */
+* CropJS ---------------------- DOCUMENTATION NOT COMPLETE
+* This is a JavaScript widget that adds end-user cropping functionality to any image
+* on a webpage with a number of configurable options. It makes use of the KineticJS library. 
+*/
 
 
 
@@ -49,7 +49,9 @@ function CropJS(config) {
     var that = this
 
     // Check if required/optional attributes are present
-    for (var attr in config) this[attr] = config[attr];
+    for (var attr in config) {
+        this[attr] = config[attr];
+    }
     if (!this.imageSrc) {
         console.log("required attribute imageSrc not defined");
         return;
