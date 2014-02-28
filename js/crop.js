@@ -150,20 +150,31 @@ CropJS.prototype = {
             })
             .on('mousemove touchmove', function () {
                 if (!canvas._selectionRectangle.mouse) return;
+                var pointer = canvas._stage.getPointerPosition(),
+                    initialEdges = canvas._selectionRectangle.initialEdges,
+                    initialPosition = canvas._selectionrectangle.initialPosition;
                 // Calculate new position of selected region
-                canvas.cropEdges.leftX = canvas._selectionRectangle.initialEdges.leftX + (canvas._stage.getPointerPosition().x - canvas._selectionRectangle.initialPosition.x);
-                canvas.cropEdges.rightX = canvas._selectionRectangle.initialEdges.rightX + (canvas._stage.getPointerPosition().x - canvas._selectionRectangle.initialPosition.x);
-                canvas.cropEdges.topY = canvas._selectionRectangle.initialEdges.topY + (canvas._stage.getPointerPosition().y - canvas._selectionRectangle.initialPosition.y);
-                canvas.cropEdges.bottomY = canvas._selectionRectangle.initialEdges.bottomY + (canvas._stage.getPointerPosition().y - canvas._selectionRectangle.initialPosition.y);
+                canvas.cropEdges.leftX = initialEdges.leftX + (pointer.x - initialPosition.x);
+                canvas.cropEdges.rightX = initialEdges.rightX + (pointer.x - initialPosition.x);
+                canvas.cropEdges.topY = initialEdges.topY + (pointer.y - initialPosition.y);
+                canvas.cropEdges.bottomY = initialEdges.bottomY + (pointer.y - initialPosition.y);
                 // Apply constraints
                 if (canvas.cropEdges.leftX < 0) canvas.cropEdges.leftX = 0;
-                if (canvas.cropEdges.leftX > (canvas._stage.attrs.width - this.attrs.width)) canvas.cropEdges.leftX = canvas._stage.attrs.width - this.attrs.width;
+                if (canvas.cropEdges.leftX > (canvas._stage.attrs.width - this.attrs.width)) {
+                    canvas.cropEdges.leftX = canvas._stage.attrs.width - this.attrs.width;
+                }
                 if (canvas.cropEdges.rightX < this.attrs.width) canvas.cropEdges.rightX = this.attrs.width;
-                if (canvas.cropEdges.rightX > canvas._stage.attrs.width) canvas.cropEdges.rightX = canvas._stage.attrs.width;
+                if (canvas.cropEdges.rightX > canvas._stage.attrs.width) {
+                    canvas.cropEdges.rightX = canvas._stage.attrs.width;
+                }
                 if (canvas.cropEdges.topY < 0) canvas.cropEdges.topY = 0;
-                if (canvas.cropEdges.topY > (canvas._stage.attrs.height - this.attrs.height)) canvas.cropEdges.topY = canvas._stage.attrs.height - this.attrs.height;
+                if (canvas.cropEdges.topY > (canvas._stage.attrs.height - this.attrs.height)) {
+                    canvas.cropEdges.topY = canvas._stage.attrs.height - this.attrs.height;
+                }
                 if (canvas.cropEdges.bottomY < this.attrs.height) canvas.cropEdges.bottomY = this.attrs.height;
-                if (canvas.cropEdges.bottomY > canvas._stage.attrs.height) canvas.cropEdges.bottomY = canvas._stage.attrs.height;
+                if (canvas.cropEdges.bottomY > canvas._stage.attrs.height) {
+                    canvas.cropEdges.bottomY = canvas._stage.attrs.height;
+                }
             })
             .on('mouseup touchend', function () {
                 if (!canvas._selectionRectangle.mouse) return;
