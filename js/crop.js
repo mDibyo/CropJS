@@ -1,7 +1,11 @@
 ﻿/**
  * CropJS ---------------------- DOCUMENTATION NOT COMPLETE
  * This is a JavaScript widget that adds end-user cropping functionality to any image
- * on a webpage with a number of configurable options. It makes use of the KineticJS library. 
+ * on a webpage with a number of configurable options. It makes use of the KineticJS
+ * library. The interface works with mouse as well as touch.
+ * The interface lets people select any region whcih can then be dragged and resized
+ * with customizable handles. The selected region can be dropped simply by selecting
+ * a new region with the mouse. 
  */
 
 
@@ -197,22 +201,22 @@ CropJS.prototype = {
     },
 
     add: function (canvas) {
-        // Add a selection region to the canvas
-        canvas._dynamicLayer.add(this.rect);
+      // Add a selection region to the canvas
+      canvas._dynamicLayer.add(this.rect);
     },
 
     remove: function (canvas) {
-        // Remove a selection region from the canvas
-        this.rect.remove();
+      // Remove a selection region from the canvas
+      this.rect.remove();
     },
 
     update: function (canvas) {
-        // Update the selection region in the canvas
-        var edges = canvas.cropEdges;
-        this.rect.setX(edges.leftX);
-        this.rect.setY(edges.topY);
-        this.rect.setWidth(edges.rightX - edges.leftX);
-        this.rect.setHeight(edges.bottomY - edges.topY);
+      // Update the selection region in the canvas
+      var edges = canvas.cropEdges;
+      this.rect.setX(edges.leftX);
+      this.rect.setY(edges.topY);
+      this.rect.setWidth(edges.rightX - edges.leftX);
+      this.rect.setHeight(edges.bottomY - edges.topY);
     },
           
   },
