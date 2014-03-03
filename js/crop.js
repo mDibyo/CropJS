@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CropJS ---------------------- DOCUMENTATION NOT COMPLETE
  * This is a JavaScript widget that adds end-user cropping functionality to any image
  * on a webpage with a number of configurable options. It makes use of the KineticJS
@@ -45,12 +45,12 @@ EdgeList.prototype = {
     }
   },
 
-}
+};
 
 
 function CropJS(config) {
 
-  var that = this
+  var that = this;
 
   // Check if required/optional attributes are present
   for (var attr in config) this[attr] = config[attr];
@@ -71,7 +71,7 @@ function CropJS(config) {
   this.background.src = this.imageSrc;
   this.background.onload = function () {
     that._initStage();
-  }
+  };
 
 } 
 
@@ -111,7 +111,7 @@ CropJS.prototype = {
           canvas._initSelectionRectangle();
           canvas._addSelectionRectangle();
           canvas._handles.active = 'bottomRight';
-          canvas._removeFullMask()
+          canvas._removeFullMask();
         })
 
       ;
@@ -245,7 +245,7 @@ CropJS.prototype = {
           document.body.style.cursor = 'default';
         })
         .on('mousedown touchstart', function () {
-          if (canvas._handles.active != undefined &&
+          if (canvas._handles.active !== undefined &&
             canvas._handles.active != 'topLeft') {
             return;
           }
@@ -277,7 +277,7 @@ CropJS.prototype = {
           document.body.style.cursor = 'default';
         })
         .on('mousedown touchstart', function () {
-          if (canvas._handles.active != undefined &&
+          if (canvas._handles.active !== undefined &&
             canvas._handles.active != 'topRight') {
             return;
           }
@@ -309,7 +309,7 @@ CropJS.prototype = {
           document.body.style.cursor = 'default';
         })
         .on('mousedown touchstart', function () {
-          if (canvas._handles.active != undefined &&
+          if (canvas._handles.active !== undefined &&
             canvas._handles.active != 'bottomLeft') {
             return;
           }
@@ -341,7 +341,7 @@ CropJS.prototype = {
             document.body.style.cursor = 'default';
         })
         .on('mousedown touchstart', function () {
-          if (canvas._handles.active != undefined &&
+          if (canvas._handles.active !== undefined &&
             canvas._handles.active != 'bottomRight') {
             return;
           }
@@ -616,7 +616,7 @@ CropJS.prototype = {
 
     var that = this;
 
-    this._masks.add(this)
+    this._masks.add(this);
     this._selectionRectangle.add(this);
     this._handles.add(this);
     this._dynamicLayer.draw();
