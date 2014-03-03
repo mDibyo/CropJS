@@ -735,9 +735,14 @@ CropJS.prototype = {
 
   },
 
+  getSelectionRectangle: function () {
+
+
+
+  },
+
   cut: function () {
     console.log("This is the cut function");
   },
 
 };
-
