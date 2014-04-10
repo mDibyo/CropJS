@@ -793,9 +793,7 @@ CropJS.prototype = {
   },
 
   getSelectionRectangle: function () {
-
-
-
+    return new EdgeList(this.cropEdges);
   },
 
   cut: function () {
