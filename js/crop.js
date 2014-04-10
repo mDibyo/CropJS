@@ -102,6 +102,22 @@ EdgeList.prototype = {
 
   },
 
+  /**
+   * getXYWH function returns the dimension of the image as the coordinates of the bottomLeft
+   * vertex and the width and height of the crop selection.
+   * @return {Object} the x, y coordinates of bottomLeft corner, width and height of the crop selection
+   */
+  getXYWH: function() {
+
+    return {
+      x: this.bottomY,
+      y: this.leftX,
+      width: this.rightX - this.leftX,
+      height: this.topY - this.bottomY,
+    }
+
+  }
+
 };
 
 
