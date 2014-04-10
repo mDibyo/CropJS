@@ -75,6 +75,33 @@ EdgeList.prototype = {
 
   },
 
+  /**
+   * getCoordinates function returns the coordinates of the four vertices of the selected region
+   * @return {Object} the coordinates of topLeft, topRight, bottomLeft and bottomRight vertices
+   */
+  getCoordinates: function() {
+
+    return {
+      topLeft: {
+        x: this.leftX,
+        y: this.topY,
+      },
+      topRight: {
+        x: this.rightX,
+        y: this.topY,
+      },
+      bottomLeft: {
+        x: this.leftX,
+        y: this.bottomY,
+      },
+      bottomRight: {
+        x: this.rightX,
+        y: this.bottomY,
+      },
+    };
+
+  },
+
 };
 
 
