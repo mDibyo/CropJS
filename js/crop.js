@@ -5,11 +5,22 @@
  * library. The interface works with mouse as well as touch.
  * The interface lets people select any region whcih can then be dragged and resized
  * with customizable handles. The selected region can be dropped simply by selecting
- * a new region with the mouse. 
+ * a new region with the mouse.
+ * @author Dibyo Majumdar <dibyo.majumdar@gmail.com>
  */
 
 
-
+/**
+ * EdgeList constructor
+ * Edgelist specifies the edges of the crop selection in an image as a list of four
+ * coordinates that represent the top, bottom, left and right edges of the selection
+ * without any duplication in information.
+ * @param {Object} edgeObject
+ * @param {Number} [edgeObject.leftX] the x-coordinate of the left edge of selection
+ * @param {Number} [edgeObject.rightX] the x-coordinate of the right edge of selection
+ * @param {Number} [edgeObject.topY] the y-coordinate of the top edge of selection
+ * @param {Number} [edgeObject.bototmY] the y-coordinate of the bottom edge of selection
+ */
 function EdgeList(edgeObject) {
 
   this.leftX = edgeObject.leftX;
@@ -17,32 +28,51 @@ function EdgeList(edgeObject) {
   this.topY = edgeObject.topY;
   this.bottomY = edgeObject.bottomY;
   this.defined = true;
+  this.normalized = false;
 
 }
 
 
 EdgeList.prototype = {
 
+  /**
+   * normalize function normalizes the edges of the crop selection to the total width and
+   * height of the image
+   * @param  {Object} cropObject Object representing the full image
+   * @param  {boolean} force     when true, perform normalization even if edges may already be normalized
+   * @return {Object}            this EdgeList object
+   */
   normalize: function(cropObject, force) {
-    if (this.rightX > 1 || force) {
+
+    if (!this.normalized || force) {      
       this.leftX /= cropObject.width;
       this.rightX /= cropObject.width;
-    }
-    if (this.bottomY > 1 || force) {
       this.topY /= cropObject.height;
       this.bottomY /= cropObject.width;
     }
+
+    return this;
+
   },
 
+  /**
+   * denormalize function performs the opposite of the normalize function ie. it scales the
+   * edges in proportion to the total width and height of the image
+   * @param  {Object} cropObject Object representing the full image
+   * @param  {boolean} force     when true, perform denormalization even if edges may not be normalized
+   * @return {Object}            this EdgeList object
+   */
   denormalize: function (cropObject, force) {
-    if (this.leftX < 1 && this.rightX < 1 || force) {
+
+    if (this.normalized || force) {
       this.leftX *= cropObject.width;
       this.rightX *= cropObject.width;
-    }
-    if (this.topY < 1 && this.bottomY < 1 || force) {
       this.topY *= cropObject.height;
       this.bottomY *= cropObject.height;
     }
+
+    return this;
+
   },
 
 };
