@@ -127,8 +127,8 @@ function CropJS(config) {
 
   // Check if required/optional attributes are present
   for (var attr in config) this[attr] = config[attr];
-  if (!this.imageSrc) {
-    console.log("required attribute imageSrc not defined");
+  if (!this.imageSrc && !this.image) {
+    console.log("required attribute imageSrc/image not defined");
     return;
   }
   if (!this.imageContainerID) {
@@ -140,11 +140,17 @@ function CropJS(config) {
   }
 
   // Setup canvas with KinecticJS
-  this.background = new Image();
-  this.background.src = this.imageSrc;
-  this.background.onload = function () {
-    that._initStage();
-  };
+  if (!this.image) {    
+    this.background = new Image();
+    this.background.src = this.imageSrc;
+    this.background.onload = function () {
+      that._initStage();
+    };
+  } else {
+    this.background = this.image;
+    this._initStage();
+  }
+
 
 } 
 
@@ -809,6 +815,9 @@ CropJS.prototype = {
   },
 
   getSelectionRectangle: function () {
+    if (this.cropEdges === undefined) {
+      return false;
+    }
     return new EdgeList(this.cropEdges);
   },
 
