@@ -144,7 +144,7 @@ EdgeList.prototype = {
  *     the original height of the image is used)
  * @param {EdgeList} config.cropEdges the set of edges of the initial selection rectangle and whether they
  *     are normalized (OPTIONAL - by default, the canvas is loaded without a selected region)
- *     @return {CropJS} the CropJS object
+ * @return {CropJS} the CropJS object
  *
  * @example
  * var cropObj = new CropJS({
@@ -730,7 +730,6 @@ CropJS.prototype = {
     if (!this.handleSize) {
       this.handleSize = 10;
     }
-    console.log(this);
     this._handles.init(this);        
     
     // Masks
@@ -873,7 +872,7 @@ CropJS.prototype = {
   },
 
   cut: function () {
-    console.log("This is the cut function");
+    console.log("This is the cut function. \nIt has not been Implemented yet");
   },
 
 };

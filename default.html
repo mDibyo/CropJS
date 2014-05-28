@@ -13,9 +13,10 @@
     <script type="text/javascript" src="./js/crop.js"></script>
     <script type="text/javascript">
         var imgObj = new Image();
+        var cropObj;
         imgObj.src = "images/background.jpg";
         imgObj.onload = function() {
-            var cropObj = new CropJS({
+            cropObj = new CropJS({
                 image: imgObj,
                 imageContainerID: "containerID",
             });
