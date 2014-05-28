@@ -121,6 +121,12 @@ EdgeList.prototype = {
 };
 
 
+/**
+ * CropJS constructor
+ * It initializes the image canvas to be used with CropJS using the set of configurational
+ * arguments passed into it.
+ * @param {Object} config
+ */
 function CropJS(config) {
 
   var that = this;
@@ -139,14 +145,16 @@ function CropJS(config) {
     this.selectionRectangleColor = 'white';
   }
 
-  // Setup canvas with KinecticJS
-  if (!this.image) {    
+  // Setup canvas with KinecticJS after loading image if necessary
+  if (!this.image) {
+    // Image has not been loaded yet
     this.background = new Image();
     this.background.src = this.imageSrc;
     this.background.onload = function () {
       that._initStage();
     };
   } else {
+    // Image has already been loaded
     this.background = this.image;
     this._initStage();
   }
