@@ -50,14 +50,14 @@ function EdgeList(edgeObject) {
  * arguments passed into it.
  * @param {Object} config
  * @param {String} config.imageContainerID the id of the div to be used for setting up CropJS (REQUIRED)
- * @param {Image} config.image the Image object on which croping has to be done (ONLY REQUIRED when
+ * @param {Image} config.image the Image object on which cropping has to be done (ONLY REQUIRED when
  *     CropJS is called in the onload function of the image)
  * @param {String} config.imageSrc the filepath of the image file relative to the directory where the 
  *     webpage is stored (ONLY REQUIRED when object has not been already loaded - CropJS will load the
  *     image from this location)
- * @param {Number} config.width the preferred width of the canvas/image displayed (OPTIONAL - by default,
+ * @param {Number} config.width the preferred width of the dsplayed canvas/image (OPTIONAL - by default,
  *     the original width of the image is used)
- * @param {Number} config.height the preferred height of the canvas/image displayed (OPTIONAL - by default,
+ * @param {Number} config.height the preferred height of the displayed canvas/image (OPTIONAL - by default,
  *     the original height of the image is used)
  * @param {EdgeList} config.cropEdges the set of edges of the initial selection rectangle and whether they
  *     are normalized (OPTIONAL - by default, the canvas is loaded without a selected region)
