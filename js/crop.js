@@ -1,5 +1,5 @@
 /**
- * CropJS ---------------------- DOCUMENTATION NOT COMPLETE
+ * CropJS
  * This is a JavaScript widget that adds end-user cropping functionality to any image
  * on a webpage with a number of configurable options. It makes use of the KineticJS
  * library. The interface works with mouse as well as touch.
@@ -8,6 +8,11 @@
  * a new region with the mouse.
  * @author Dibyo Majumdar <dibyo.majumdar@gmail.com>
  */
+
+
+
+
+
 
 
 /**
@@ -37,6 +42,86 @@ function EdgeList(edgeObject) {
   }
 
 }
+
+
+/**
+ * CropJS constructor
+ * It initializes the image canvas to be used with CropJS using the set of configurational
+ * arguments passed into it.
+ * @param {Object} config
+ * @param {String} config.imageContainerID the id of the div to be used for setting up CropJS (REQUIRED)
+ * @param {Image} config.image the Image object on which croping has to be done (ONLY REQUIRED when
+ *     CropJS is called in the onload function of the image)
+ * @param {String} config.imageSrc the filepath of the image file relative to the directory where the 
+ *     webpage is stored (ONLY REQUIRED when object has not been already loaded - CropJS will load the
+ *     image from this location)
+ * @param {Number} config.width the preferred width of the canvas/image displayed (OPTIONAL - by default,
+ *     the original width of the image is used)
+ * @param {Number} config.height the preferred height of the canvas/image displayed (OPTIONAL - by default,
+ *     the original height of the image is used)
+ * @param {EdgeList} config.cropEdges the set of edges of the initial selection rectangle and whether they
+ *     are normalized (OPTIONAL - by default, the canvas is loaded without a selected region)
+ * @param {String} config.selectionRectangleColor the color of handles used to adjust selected region
+ * @return {CropJS} the CropJS object
+ *
+ * @example
+ * var cropObj = new CropJS({
+ *   imageSrc: "images/image.jpg",
+ *   imageContainer: "containerID",
+ *   width: 600,
+ *   height: 200,
+ *   cropEdges: new EdgeList({
+ *     topY: 0.2,
+ *     bottomY: 0.5,
+ *     leftX: 0.2,
+ *     rightX: 0.8
+ *   })
+ * });
+ *
+ * @example
+ * var imgObj = new Image();
+ * imgObj.src = "images/image.jpg";
+ * imgObj.onload = function() {
+ *   var cropObj = new CropJS({
+ *     image: imgObj,
+ *     imageContainerID: "containerID",
+ *   })
+ * }
+ */
+function CropJS(config) {
+
+  var that = this;
+
+  // Check if required/optional attributes are present
+  for (var attr in config) this[attr] = config[attr];
+  if (!this.imageSrc && !this.image) {
+    console.log("required attribute imageSrc/image not defined");
+    return;
+  }
+  if (!this.imageContainerID) {
+    console.log("required attribute imageContainerID not defined");
+    return;
+  }
+  if (!this.selectionRectangleColor) {
+    this.selectionRectangleColor = 'white';
+  }
+
+  // Setup canvas with KinecticJS after loading image if necessary
+  if (!this.image) {
+    // Image has not been loaded yet
+    this.background = new Image();
+    this.background.src = this.imageSrc;
+    this.background.onload = function () {
+      that._initStage();
+    };
+  } else {
+    // Image has already been loaded
+    this.background = this.image;
+    this._initStage();
+  }
+
+  return this;
+} 
 
 
 EdgeList.prototype = {
@@ -125,85 +210,6 @@ EdgeList.prototype = {
   }
 
 };
-
-
-/**
- * CropJS constructor
- * It initializes the image canvas to be used with CropJS using the set of configurational
- * arguments passed into it.
- * @param {Object} config
- * @param {String} config.imageContainerID the id of the div to be used for setting up CropJS (REQUIRED)
- * @param {Image} config.image the Image object on which croping has to be done (ONLY REQUIRED when
- *     CropJS is called in the onload function of the image)
- * @param {String} config.imageSrc the filepath of the image file relative to the directory where the 
- *     webpage is stored (ONLY REQUIRED when object has not been already loaded - CropJS will load the
- *     image from this location)
- * @param {Number} config.width the preferred width of the canvas/image displayed (OPTIONAL - by default,
- *     the original width of the image is used)
- * @param {Number} config.height the preferred height of the canvas/image displayed (OPTIONAL - by default,
- *     the original height of the image is used)
- * @param {EdgeList} config.cropEdges the set of edges of the initial selection rectangle and whether they
- *     are normalized (OPTIONAL - by default, the canvas is loaded without a selected region)
- * @return {CropJS} the CropJS object
- *
- * @example
- * var cropObj = new CropJS({
- *   imageSrc: "images/image.jpg",
- *   imageContainer: "containerID",
- *   width: 600,
- *   height: 200,
- *   cropEdges: new EdgeList({
- *     topY: 0.2,
- *     bottomY: 0.5,
- *     leftX: 0.2,
- *     rightX: 0.8
- *   })
- * });
- *
- * @example
- * var imgObj = new Image();
- * imgObj.src = "images/image.jpg";
- * imgObj.onload = function() {
- *   var cropObj = new CropJS({
- *     image: imgObj,
- *     imageContainerID: "containerID",
- *   })
- * }
- */
-function CropJS(config) {
-
-  var that = this;
-
-  // Check if required/optional attributes are present
-  for (var attr in config) this[attr] = config[attr];
-  if (!this.imageSrc && !this.image) {
-    console.log("required attribute imageSrc/image not defined");
-    return;
-  }
-  if (!this.imageContainerID) {
-    console.log("required attribute imageContainerID not defined");
-    return;
-  }
-  if (!this.selectionRectangleColor) {
-    this.selectionRectangleColor = 'white';
-  }
-
-  // Setup canvas with KinecticJS after loading image if necessary
-  if (!this.image) {
-    // Image has not been loaded yet
-    this.background = new Image();
-    this.background.src = this.imageSrc;
-    this.background.onload = function () {
-      that._initStage();
-    };
-  } else {
-    // Image has already been loaded
-    this.background = this.image;
-    this._initStage();
-  }
-
-  return this;
-} 
 
 
 CropJS.prototype = {
@@ -872,7 +878,7 @@ CropJS.prototype = {
   },
 
   cut: function () {
-    console.log("This is the cut function. \nIt has not been Implemented yet");
+    console.log("This is the cut function. \nIt has not been Implemented yet. :/");
   },
 
 };
