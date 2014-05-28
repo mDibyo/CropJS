@@ -145,6 +145,30 @@ EdgeList.prototype = {
  * @param {EdgeList} config.cropEdges the set of edges of the initial selection rectangle and whether they
  *     are normalized (OPTIONAL - by default, the canvas is loaded without a selected region)
  *     @return {CropJS} the CropJS object
+ *
+ * @example
+ * var cropObj = new CropJS({
+ *   imageSrc: "images/image.jpg",
+ *   imageContainer: "containerID",
+ *   width: 600,
+ *   height: 200,
+ *   cropEdges: new EdgeList({
+ *     topY: 0.2,
+ *     bottomY: 0.5,
+ *     leftX: 0.2,
+ *     rightX: 0.8
+ *   })
+ * });
+ *
+ * @example
+ * var imgObj = new Image();
+ * imgObj.src = "images/image.jpg";
+ * imgObj.onload = function() {
+ *   var cropObj = new CropJS({
+ *     image: imgObj,
+ *     imageContainerID: "containerID",
+ *   })
+ * }
  */
 function CropJS(config) {
 
