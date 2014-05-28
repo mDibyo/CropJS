@@ -28,7 +28,11 @@ function EdgeList(edgeObject) {
   this.topY = edgeObject.topY;
   this.bottomY = edgeObject.bottomY;
   this.defined = true;
-  this.normalized = false;
+  if (edgeObject.normalized === undefined) {
+    this.normalized = false;
+  } else {
+    this.normalized = edgeObject.normalized;
+  }
 
 }
 
@@ -58,7 +62,7 @@ EdgeList.prototype = {
   /**
    * denormalize function performs the opposite of the normalize function ie. it scales the
    * edges in proportion to the total width and height of the image
-   * @param  {Object} cropObject Object representing the full image
+   * @param  {Object} cropObject Object representing the full image as a CropJS object
    * @param  {boolean} force     when true, perform denormalization even if edges may not be normalized
    * @return {Object}            this EdgeList object
    */
@@ -126,6 +130,17 @@ EdgeList.prototype = {
  * It initializes the image canvas to be used with CropJS using the set of configurational
  * arguments passed into it.
  * @param {Object} config
+ * @param {String} config.imageContainerID the id of the div to be used for setting up CropJS (REQUIRED)
+ * @param {Image} config.image the Image object on which croping has to be done (ONLY REQUIRED when
+ *     CropJS is called in the onload function of the image)
+ * @param {String} config.imageSrc the filepath of the image file relative to the directory where the 
+ *     webpage is stored (ONLY REQUIRED when object has not been already loaded - CropJS will load the image
+ *     from this location)
+ * @param {Number} config.width the preferred width of the canvas/image displayed (OPTIONAL - by default, the
+ *     original width of the image is used)
+ * @param {Number} config.height the preferred height of the canvas/image displayed (OPTIONAL - by default,
+ *     the original height of the image is used)
+ * @param {EdgeList} config.cropEdges the set of edges of the initial selection rectangle
  */
 function CropJS(config) {
 
