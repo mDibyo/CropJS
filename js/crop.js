@@ -19,7 +19,9 @@
  * @param {Number} [edgeObject.leftX] the x-coordinate of the left edge of selection
  * @param {Number} [edgeObject.rightX] the x-coordinate of the right edge of selection
  * @param {Number} [edgeObject.topY] the y-coordinate of the top edge of selection
- * @param {Number} [edgeObject.bototmY] the y-coordinate of the bottom edge of selection
+ * @param {Number} [edgeObject.bottomY] the y-coordinate of the bottom edge of selection
+ * @param {boolean} [edgeObject.isNormalized] whether the edges are given in normalized
+ *     form (ie. as a ratio between the edge and image dimensions)
  */
 function EdgeList(edgeObject) {
 
@@ -28,10 +30,10 @@ function EdgeList(edgeObject) {
   this.topY = edgeObject.topY;
   this.bottomY = edgeObject.bottomY;
   this.defined = true;
-  if (edgeObject.normalized === undefined) {
-    this.normalized = false;
+  if (edgeObject.isNormalized === undefined) {
+    this.isNormalized = false;
   } else {
-    this.normalized = edgeObject.normalized;
+    this.isNormalized = edgeObject.isNormalized;
   }
 
 }
@@ -43,18 +45,18 @@ EdgeList.prototype = {
    * normalize function normalizes the edges of the crop selection to the total width and
    * height of the image
    * @param  {Object} cropObject Object representing the full image
-   * @param  {boolean} force     when true, perform normalization even if edges may already be normalized
    * @return {Object}            this EdgeList object
    */
   normalize: function(cropObject, force) {
 
-    if (!this.normalized || force) {      
+    if (!this.isNormalized) {      
       this.leftX /= cropObject.width;
       this.rightX /= cropObject.width;
       this.topY /= cropObject.height;
       this.bottomY /= cropObject.width;
     }
 
+    this.isNormalized = true;
     return this;
 
   },
@@ -63,25 +65,25 @@ EdgeList.prototype = {
    * denormalize function performs the opposite of the normalize function ie. it scales the
    * edges in proportion to the total width and height of the image
    * @param  {Object} cropObject Object representing the full image as a CropJS object
-   * @param  {boolean} force     when true, perform denormalization even if edges may not be normalized
    * @return {Object}            this EdgeList object
    */
   denormalize: function (cropObject, force) {
 
-    if (this.normalized || force) {
+    if (this.isNormalized) {
       this.leftX *= cropObject.width;
       this.rightX *= cropObject.width;
       this.topY *= cropObject.height;
       this.bottomY *= cropObject.height;
     }
 
+    this.isNormalized = false;
     return this;
 
   },
 
   /**
    * getCoordinates function returns the coordinates of the four vertices of the selected region
-   * @return {Object} the coordinates of topLeft, topRight, bottomLeft and bottomRight vertices
+   * @return {Object} the coordinates (x, y) of topLeft, topRight, bottomLeft and bottomRight vertices
    */
   getCoordinates: function() {
 
@@ -134,13 +136,15 @@ EdgeList.prototype = {
  * @param {Image} config.image the Image object on which croping has to be done (ONLY REQUIRED when
  *     CropJS is called in the onload function of the image)
  * @param {String} config.imageSrc the filepath of the image file relative to the directory where the 
- *     webpage is stored (ONLY REQUIRED when object has not been already loaded - CropJS will load the image
- *     from this location)
- * @param {Number} config.width the preferred width of the canvas/image displayed (OPTIONAL - by default, the
- *     original width of the image is used)
+ *     webpage is stored (ONLY REQUIRED when object has not been already loaded - CropJS will load the
+ *     image from this location)
+ * @param {Number} config.width the preferred width of the canvas/image displayed (OPTIONAL - by default,
+ *     the original width of the image is used)
  * @param {Number} config.height the preferred height of the canvas/image displayed (OPTIONAL - by default,
  *     the original height of the image is used)
- * @param {EdgeList} config.cropEdges the set of edges of the initial selection rectangle
+ * @param {EdgeList} config.cropEdges the set of edges of the initial selection rectangle and whether they
+ *     are normalized (OPTIONAL - by default, the canvas is loaded without a selected region)
+ *     @return {CropJS} the CropJS object
  */
 function CropJS(config) {
 
@@ -174,7 +178,7 @@ function CropJS(config) {
     this._initStage();
   }
 
-
+  return this;
 } 
 
 

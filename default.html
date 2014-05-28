@@ -6,7 +6,7 @@
 
 </head>
 <body>
-    <div id="container"></div>
+    <div id="containerID"></div>
     <button onclick="cropObj.cut()">Crop</button>
     <button onclick="cropObj.clearSelection()">Clear</button>
     <script type="text/javascript" src="./js/kinetic-v4.7.4.min.js"></script>
@@ -15,7 +15,7 @@
         /*
         var cropObj = new CropJS({
             imageSrc: "images/background.jpg",
-            imageContainerID: "container",
+            imageContainerID: "containerID",
             // width: 600,
             // height: 200,
             // cropEdges: new EdgeList({
@@ -26,12 +26,11 @@
             // }),
         }); */
         var imgObj = new Image();
-        var cropObj;
         imgObj.src = "images/background.jpg";
         imgObj.onload = function() {
-            cropObj = new CropJS({
+            var cropObj = new CropJS({
                 image: imgObj,
-                imageContainerID: "container",
+                imageContainerID: "containerID",
             });
         }
     </script>
