@@ -1,25 +1,29 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>cropper</title>
+  <meta charset="utf-8" />
+  <title>cropper</title>
 
 </head>
 <body>
-    <div id="containerID"></div>
-    <button onclick="cropObj.clearSelection()">Clear</button>
-    <script type="text/javascript" src="./js/kinetic-v4.7.4.min.js"></script>
-    <script type="text/javascript" src="./js/crop.js"></script>
-    <script type="text/javascript">
-        var imgObj = new Image();
-        var cropObj;
-        imgObj.src = "images/background.jpg";
-        imgObj.onload = function() {
-            cropObj = new CropJS({
-                image: imgObj,
-                imageContainerID: "containerID",
-            });
-        }
-    </script>
+  <div id="containerID"></div>
+  <button onclick="cropObj.clearSelection()">Clear</button>
+  <script type="text/javascript" src="./js/kinetic-v4.7.4.min.js"></script>
+  <script type="text/javascript" src="./js/crop.js"></script>
+  <script type="text/javascript">
+    var cropObj = new CropJS({
+      imageSrc: "images/image1.jpg",
+      imageContainerID: "containerID",
+      width: 600,
+      height: 400,
+      cropEdges: new EdgeList({
+        topY: 0.2,
+        bottomY: 0.7,
+        leftX: 0.2,
+        rightX: 0.8,
+        isNormalized: true,
+      })
+    });
+  </script>
 </body>
 </html>
