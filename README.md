@@ -20,7 +20,7 @@ The CropJS object can be created wehen the image is loaded or before. It is crea
     * ``` bottomY ```: b
     * ``` isNormalized ```: Whether the edges are normalized or not ie. whether the full image would fit between the edges x = 0, x = 1, y = 0 and y = 1
     
-For more information, please refer to the documentation in js/crop.js
+For more information, please refer to documentation in js/crop.js
 
 
     
